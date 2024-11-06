@@ -77,6 +77,7 @@ class ProductListActivity : AppCompatActivity() {
         val productRecyclerView: RecyclerView = findViewById(R.id.productRecyclerView)
         productRecyclerView.layoutManager = LinearLayoutManager(this)
         productRecyclerView.adapter = ProductAdapter(this, products) { selectedProduct ->
+            // TODO use only one function
             if (selectedProduct.dilutions.all { it.mode == null })
                 showDilutionSelectionDialog(selectedProduct)
             else
@@ -154,7 +155,7 @@ class ProductListActivity : AppCompatActivity() {
 
         // Crea l'AlertDialog
         val alertDialog = AlertDialog.Builder(this)
-            .setTitle("Seleziona una diluizione per ${product.name}")
+            .setTitle("Diluizione per ${product.name}")
             .setView(expandableListView)
             .setNegativeButton("Annulla", null)
             .create()
