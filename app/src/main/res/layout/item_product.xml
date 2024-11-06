@@ -7,13 +7,14 @@
 
     <ImageView
         android:id="@+id/productImage"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:layout_gravity="center"
         android:src="@drawable/default_image" />
 
     <LinearLayout
         android:orientation="vertical"
+        android:paddingLeft="10dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -22,6 +23,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="18sp"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:text="Product Name" />
 
         <TextView
@@ -30,7 +33,17 @@
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:text="Product Description"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/productLinkTextView"
+            android:paddingTop="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Product link"
+            android:textColor="@color/link_color" />
     </LinearLayout>
 
 </LinearLayout>

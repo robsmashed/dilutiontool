@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             val dilutionRatio = dilutionRatioEditText.text.toString().toDoubleOrNull()
             val totalLiquid = totalLiquidEditText.text.toString().toDoubleOrNull()
 
-            if (dilutionRatio != null && dilutionRatio > 0 && totalLiquid != null && totalLiquid > 0) {
+            if (dilutionRatio != null && dilutionRatio >= 0 && totalLiquid != null && totalLiquid > 0) {
                 val concentrate = totalLiquid / (dilutionRatio + 1)
                 val water = totalLiquid - concentrate
                 val formattedConcentrate = String.format("%.1f", concentrate)
