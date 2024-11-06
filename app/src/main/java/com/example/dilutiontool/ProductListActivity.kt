@@ -71,7 +71,61 @@ class ProductListActivity : AppCompatActivity() {
                 ),
                 "https://www.lacuradellauto.it/web/image/product.product/4339/image_1024/mixlabpri-labocosmetica-primus-prewash?unique=33ca8ef",
                 "https://www.lacuradellauto.it/3034-labocosmetica-primus-prewash#attr=2345706"
-            )
+            ),
+            Product(
+                2899,
+                "Labocosmetica Omnia Interior Cleaner",
+                "Omnia è un pulitore per interni auto di nuova generazione, ideale per pulire tessuti, pelle, plastiche, moquette, guarnizioni e gomme, senza rischi per le superfici più delicate.",
+                arrayOf(
+                    Dilution("Per sporchi difficili", 5),
+                    Dilution("Come Quick Interior Detailer", 10),
+                ),
+                "https://www.lacuradellauto.it/web/image/product.product/3968/image_1024/mixlabom-labocosmetica-omnia-interior-cleaner?unique=422d44d",
+                "https://www.lacuradellauto.it/2899-labocosmetica-omnia-interior-cleaner#attr=2345691"
+            ),
+            Product(
+                4110,
+                "Labocosmetica Idrosave Rinseless/Waterless Shampoo",
+                "Labocosmetica Idrosave è uno shampoo innovativo che lava, lucida e protegge in un'unica operazione, senza necessità di risciacquo.",
+                arrayOf(
+                    Dilution("Rinseless", 250),
+                    Dilution("Waterless o come Aiuto all’Asciugatura", 100),
+                ),
+                "https://www.lacuradellauto.it/web/image/product.product/6120/image_1024/mixlabidro-labocosmetica-idrosave-rinseless-waterless-shampoo?unique=a9aadd4",
+                "https://www.lacuradellauto.it/4110-labocosmetica-idrosave-rinseless-waterless-shampoo#attr=2346091"
+            ),
+            Product(
+                1980,
+                "Labocosmetica Energo Decontaminante Calcare",
+                "Energo è un prodotto specializzato nella rimozione di tracce di calcare e residui di piogge acide da vetri e carrozzeria.",
+                arrayOf(
+                    Dilution("Diluito da puro (per casi molto gravi) fino a 1:5", 5, 0),
+                ),
+                "https://www.lacuradellauto.it/web/image/product.product/2681/image_1024/lab08-labocosmetica-energo-decontaminante-calcare-250-ml?unique=860b690",
+                "https://www.lacuradellauto.it/1980-labocosmetica-energo-decontaminante-calcare-250-ml"
+            ),
+            Product(
+                2195,
+                "Gyeon Q2M Preserve",
+                "Q²M Preserve è un prodotto rapido e semplice per ripristinare finiture interne leggermente sbiadite e proteggere altre superfici dall'usura.",
+                arrayOf(
+                    Dilution("Diluire fino a 1:5", 5, 0),
+                ),
+                "https://www.lacuradellauto.it/web/image/product.product/2897/image_1024/g093-gyeon-q2m-preserve-250-ml?unique=a49fe6b",
+                "https://www.lacuradellauto.it/2195-gyeon-q2m-preserve-250-ml"
+            ),
+            Product(
+                2928,
+                "Labocosmetica Purifica Shampoo Acido Anti-Calcare",
+                "Purifica è il primo shampoo acido al mondo nel settore del car detailing, creato da Labocosmetica.",
+                arrayOf(
+                    Dilution("Con Foam Gun", 10, 5),
+                    Dilution("In secchio", 400, 100),
+                    Dilution("In nebulizzatore", 200, 100),
+                ),
+                "https://www.lacuradellauto.it/web/image/product.product/4052/image_1024/mixlabpf-labocosmetica-purifica-shampoo-acido-anti-calcare?unique=8dc3aa7",
+                "https://www.lacuradellauto.it/2928-labocosmetica-purifica-shampoo-acido-anti-calcare.html"
+            ),
         )
 
         val productRecyclerView: RecyclerView = findViewById(R.id.productRecyclerView)
