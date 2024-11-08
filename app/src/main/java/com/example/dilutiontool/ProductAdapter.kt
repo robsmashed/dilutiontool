@@ -14,16 +14,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-
-// Data class per rappresentare un prodotto
-data class Product(val id: Number, val name: String, val description: String, val dilutions: Array<Dilution>, val imageUrl: String, var link: String)
-data class Dilution(val description: String, val value: Number, val minValue: Number? = null, val mode: String? = null)
+import com.example.dilutiontool.entity.ProductWithDilutions
 
 // Adapter per il RecyclerView
 class ProductAdapter(
     private val context: Context,
-    private val products: List<Product>,
-    private val onItemClick: (Product) -> Unit
+    private val productsWithDilutions: List<ProductWithDilutions>,
+    private val onItemClick: (ProductWithDilutions) -> Unit
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
@@ -32,11 +29,11 @@ class ProductAdapter(
     }
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-        val product = products[position]
+        val product = productsWithDilutions[position]
         holder.bind(product)
     }
 
-    override fun getItemCount(): Int = products.size
+    override fun getItemCount(): Int = productsWithDilutions.size
 
     inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val productNameTextView: TextView = itemView.findViewById(R.id.productName)
@@ -44,14 +41,14 @@ class ProductAdapter(
         private val productImageView: ImageView = itemView.findViewById(R.id.productImage)
         private val productLinkTextView: TextView = itemView.findViewById(R.id.productLinkTextView)
 
-        fun bind(product: Product) {
-            productNameTextView.text = product.name
-            productDescriptionTextView.text = product.description
+        fun bind(productWithDilution: ProductWithDilutions) {
+            productNameTextView.text = productWithDilution.product.name
+            productDescriptionTextView.text = productWithDilution.product.description
 
             val spannableString = SpannableString("Scheda prodotto")
             val clickableSpan = object : ClickableSpan() {
                 override fun onClick(widget: View) {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(product.link))
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(productWithDilution.product.link))
                     context.startActivity(intent)
                 }
             }
@@ -66,13 +63,13 @@ class ProductAdapter(
 
             // Usa Glide per caricare l'immagine
             Glide.with(itemView.context)
-                .load(product.imageUrl)
+                .load(productWithDilution.product.imageUrl)
                 .placeholder(R.drawable.product_loading)
                 .error(R.drawable.product_loading)
                 .into(productImageView)
 
             itemView.setOnClickListener {
-                onItemClick(product) // Chiamato quando il prodotto viene selezionato
+                onItemClick(productWithDilution) // Chiamato quando il prodotto viene selezionato
             }
         }
     }
