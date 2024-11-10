@@ -19,9 +19,15 @@ import com.example.dilutiontool.entity.ProductWithDilutions
 // Adapter per il RecyclerView
 class ProductAdapter(
     private val context: Context,
-    private val productsWithDilutions: List<ProductWithDilutions>,
+    private var productsWithDilutions: List<ProductWithDilutions>,
     private val onItemClick: (ProductWithDilutions) -> Unit
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
+
+    // Metodo per aggiornare la lista dei prodotti
+    fun updateList(filteredProducts: List<ProductWithDilutions>) {
+        productsWithDilutions = filteredProducts
+        notifyDataSetChanged()  // Notifica che la lista dei prodotti è cambiata
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_product, parent, false)
@@ -45,7 +51,7 @@ class ProductAdapter(
             productNameTextView.text = productWithDilution.product.name
             productDescriptionTextView.text = productWithDilution.product.description
 
-            val spannableString = SpannableString("Scheda prodotto")
+            val spannableString = SpannableString("Link prodotto")
             val clickableSpan = object : ClickableSpan() {
                 override fun onClick(widget: View) {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(productWithDilution.product.link))

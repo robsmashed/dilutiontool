@@ -1,9 +1,13 @@
 package com.example.dilutiontool
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.inputmethod.InputMethodManager
 import android.widget.ExpandableListView
+import android.widget.SearchView
 import android.widget.SimpleExpandableListAdapter
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,26 +17,63 @@ import com.example.dilutiontool.data.database.AppDatabase.Companion.getDatabase
 import com.example.dilutiontool.entity.Dilution
 import com.example.dilutiontool.entity.Product
 import com.example.dilutiontool.entity.ProductWithDilutions
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.concurrent.Executors
 
 class ProductListActivity : AppCompatActivity() {
     private lateinit var db: AppDatabase
+    private lateinit var products: List<ProductWithDilutions>
+    private lateinit var filteredProducts: List<ProductWithDilutions>
+    private lateinit var productRecyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_list)
+
+        val searchView = findViewById<SearchView>(R.id.searchView)
+        searchView.setIconifiedByDefault(false) // Espandi la SearchView di default
+
+        searchView.setOnQueryTextListener(object : android.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                // Chiudi la tastiera
+                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val currentFocusView = currentFocus
+                if (currentFocusView != null) {
+                    inputMethodManager.hideSoftInputFromWindow(currentFocusView.windowToken, 0)
+                }
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText != null) {
+                    filteredProducts = products.filter { productWithDilutions ->
+                        val product = productWithDilutions.product
+                        product.name.contains(newText, ignoreCase = true) || product.description.contains(newText, ignoreCase = true)
+                    }
+                    (productRecyclerView.adapter as ProductAdapter).updateList(filteredProducts)
+                }
+                return true
+            }
+        })
+
+        val fabAddProduct: FloatingActionButton = findViewById(R.id.fab)
+
+        fabAddProduct.setOnClickListener {
+            Toast.makeText(this, "Funzionalità in arrivo", Toast.LENGTH_SHORT).show()
+        }
 
         db = getDatabase(this)
 
         val executor = Executors.newSingleThreadExecutor()
         executor.execute {
             //populateDatabase(db)
-            val products = db.productDao().getAllProductsWithDilutionsSortedByNameAsc()
+            products = db.productDao().getAllProductsWithDilutionsSortedByNameAsc()
+            filteredProducts = products
 
             runOnUiThread {
-                val productRecyclerView: RecyclerView = findViewById(R.id.productRecyclerView)
+                productRecyclerView = findViewById(R.id.productRecyclerView)
                 productRecyclerView.layoutManager = LinearLayoutManager(this@ProductListActivity)
-                productRecyclerView.adapter = ProductAdapter(this@ProductListActivity, products) { selectedProduct ->
+                productRecyclerView.adapter = ProductAdapter(this@ProductListActivity, filteredProducts) { selectedProduct ->
                     // TODO use only one function
                     if (selectedProduct.dilutions.all { it.mode == null })
                         showDilutionSelectionDialog(selectedProduct)
