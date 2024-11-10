@@ -28,6 +28,14 @@ interface ProductDao {
     @Query("SELECT * FROM product_table")
     fun getAllProductsWithDilutions(): List<ProductWithDilutions>
 
+    @Transaction
+    @Query("SELECT * FROM product_table ORDER BY name ASC")
+    fun getAllProductsWithDilutionsSortedByNameAsc(): List<ProductWithDilutions>
+
+    @Transaction
+    @Query("SELECT * FROM product_table ORDER BY name DESC")
+    fun getAllProductsWithDilutionsSortedByNameDesc(): List<ProductWithDilutions>
+
     @Query("SELECT COUNT(*) FROM product_table")
     fun getProductCount(): Int
 }

@@ -27,7 +27,7 @@ class ProductListActivity : AppCompatActivity() {
         val executor = Executors.newSingleThreadExecutor()
         executor.execute {
             //populateDatabase(db)
-            val products = db.productDao().getAllProductsWithDilutions()
+            val products = db.productDao().getAllProductsWithDilutionsSortedByNameAsc()
 
             runOnUiThread {
                 val productRecyclerView: RecyclerView = findViewById(R.id.productRecyclerView)
@@ -52,7 +52,7 @@ class ProductListActivity : AppCompatActivity() {
 
     private fun showDilutionSelectionDialog(productWithDilutions: ProductWithDilutions) {
         AlertDialog.Builder(this)
-            .setTitle("Diluizione per ${productWithDilutions.product.name}")
+            .setTitle("Diluizioni per ${productWithDilutions.product.name}")
             .setNegativeButton("Annulla", null)
             .setItems(productWithDilutions.dilutions.map { getDescription(it) }.toTypedArray()) { _, which ->
                 val selectedDilution = productWithDilutions.dilutions[which]
@@ -108,7 +108,7 @@ class ProductListActivity : AppCompatActivity() {
 
         // Crea l'AlertDialog
         val alertDialog = AlertDialog.Builder(this)
-            .setTitle("Diluizione per ${productWithDilutions.product.name}")
+            .setTitle("Diluizioni per ${productWithDilutions.product.name}")
             .setView(expandableListView)
             .setNegativeButton("Annulla", null)
             .create()
@@ -121,48 +121,48 @@ class ProductListActivity : AppCompatActivity() {
             Product(
                 2763,
                 "LCDA SuperClean",
-                "Un detergente talmente potente da poter essere utilizzato puro per la pulizia di cerchi e motore e, allo stesso tempo, estremamente delicato da poter essere usato sulla pelle più delicata. Questo è SuperClean!",
+                "SuperClean è un potente detergente colloidale, ideale per pulire cerchi, motori e superfici delicate come la pelle.",
                 "https://www.lacuradellauto.it/web/image/product.product/3658/image_1920/lcdasc-lcda-superclean",
                 "https://www.lacuradellauto.it/2763-lcda-superclean"
             ),
             Product(
                 2784,
-                "Labocosmetica Semper Shampoo Neutro",
+                "Labocosmetica Semper",
                 "Semper è uno shampoo neutro di mantenimento, super concentrato e fortemente lubrificato.",
                 "https://www.lacuradellauto.it/web/image/product.product/3701/image_1024/mixlabsem-labocosmetica-semper-shampoo-neutro",
                 "https://www.lacuradellauto.it/2784-labocosmetica-semper-shampoo-neutro"
             ),
             Product(
                 2841,
-                "Labocosmetica Derma Cleaner - Pulitore Pelle",
+                "Labocosmetica Derma Cleaner",
                 "DÈRMA CLEANER 2.0 DI Labocosmetica è semplicemente il prodotto più completo per la cura della pelle",
                 "https://www.lacuradellauto.it/web/image/product.product/3835/image_1024/mixlabder-labocosmetica-derma-cleaner-pulitore-pelle?unique=570e27b",
                 "https://www.lacuradellauto.it/2841-labocosmetica-derma-cleaner-pulitore-pelle#attr=2345429"
             ),
             Product(
                 3034,
-                "Labocosmetica Primus Prewash",
+                "Labocosmetica Primus",
                 "PRÌMUS 2.0 di Labocosmetica è un prelavaggio avanzato per auto e moto, migliorato per offrire prestazioni superiori in termini di pulizia e sicurezza.",
                 "https://www.lacuradellauto.it/web/image/product.product/4339/image_1024/mixlabpri-labocosmetica-primus-prewash?unique=33ca8ef",
                 "https://www.lacuradellauto.it/3034-labocosmetica-primus-prewash#attr=2345706"
             ),
             Product(
                 2899,
-                "Labocosmetica Omnia Interior Cleaner",
+                "Labocosmetica Omnia",
                 "Omnia è un pulitore per interni auto di nuova generazione, ideale per pulire tessuti, pelle, plastiche, moquette, guarnizioni e gomme, senza rischi per le superfici più delicate.",
                 "https://www.lacuradellauto.it/web/image/product.product/3968/image_1024/mixlabom-labocosmetica-omnia-interior-cleaner?unique=422d44d",
                 "https://www.lacuradellauto.it/2899-labocosmetica-omnia-interior-cleaner#attr=2345691"
             ),
             Product(
                 4110,
-                "Labocosmetica Idrosave Rinseless/Waterless Shampoo",
+                "Labocosmetica Idrosave",
                 "Labocosmetica Idrosave è uno shampoo innovativo che lava, lucida e protegge in un'unica operazione, senza necessità di risciacquo.",
                 "https://www.lacuradellauto.it/web/image/product.product/6120/image_1024/mixlabidro-labocosmetica-idrosave-rinseless-waterless-shampoo?unique=a9aadd4",
                 "https://www.lacuradellauto.it/4110-labocosmetica-idrosave-rinseless-waterless-shampoo#attr=2346091"
             ),
             Product(
                 1980,
-                "Labocosmetica Energo Decontaminante Calcare",
+                "Labocosmetica Energo",
                 "Energo è un prodotto specializzato nella rimozione di tracce di calcare e residui di piogge acide da vetri e carrozzeria.",
                 "https://www.lacuradellauto.it/web/image/product.product/2681/image_1024/lab08-labocosmetica-energo-decontaminante-calcare-250-ml?unique=860b690",
                 "https://www.lacuradellauto.it/1980-labocosmetica-energo-decontaminante-calcare-250-ml"
@@ -176,7 +176,7 @@ class ProductListActivity : AppCompatActivity() {
             ),
             Product(
                 2928,
-                "Labocosmetica Purifica Shampoo Acido Anti-Calcare",
+                "Labocosmetica Purifica",
                 "Purifica è il primo shampoo acido al mondo nel settore del car detailing, creato da Labocosmetica.",
                 "https://www.lacuradellauto.it/web/image/product.product/4052/image_1024/mixlabpf-labocosmetica-purifica-shampoo-acido-anti-calcare?unique=8dc3aa7",
                 "https://www.lacuradellauto.it/2928-labocosmetica-purifica-shampoo-acido-anti-calcare.html"
@@ -208,7 +208,7 @@ class ProductListActivity : AppCompatActivity() {
 
 
             Dilution(productId = 4110, description = "Rinseless", value = 250),
-            Dilution(productId = 4110, description = "Waterless o come Aiuto all’Asciugatura", value = 100),
+            Dilution(productId = 4110, description = "Waterless o come aiuto all’asciugatura", value = 100),
 
             Dilution(productId = 1980, description = "Diluito da puro (per casi molto gravi) fino a 1:5", value = 5, minValue = 0),
 
