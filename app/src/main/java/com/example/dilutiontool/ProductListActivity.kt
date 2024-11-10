@@ -33,7 +33,7 @@ class ProductListActivity : AppCompatActivity() {
         val searchView = findViewById<SearchView>(R.id.searchView)
         searchView.setIconifiedByDefault(false) // Espandi la SearchView di default
 
-        searchView.setOnQueryTextListener(object : android.widget.SearchView.OnQueryTextListener {
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 // Chiudi la tastiera
                 val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -66,7 +66,7 @@ class ProductListActivity : AppCompatActivity() {
 
         val executor = Executors.newSingleThreadExecutor()
         executor.execute {
-            //populateDatabase(db)
+            populateDatabase(db)
             products = db.productDao().getAllProductsWithDilutionsSortedByNameAsc()
             filteredProducts = products
 
