@@ -66,7 +66,7 @@ class ProductListActivity : AppCompatActivity() {
 
         val executor = Executors.newSingleThreadExecutor()
         executor.execute {
-            populateDatabase(db)
+            //populateDatabase(db)
             products = db.productDao().getAllProductsWithDilutionsSortedByNameAsc()
             filteredProducts = products
 
