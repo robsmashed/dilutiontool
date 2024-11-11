@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.dilutiontool.DilutionUtils.getDescription
 import com.example.dilutiontool.data.database.AppDatabase
 import com.example.dilutiontool.data.database.AppDatabase.Companion.getDatabase
 import com.example.dilutiontool.entity.Dilution
@@ -74,21 +75,27 @@ class ProductListActivity : AppCompatActivity() {
                 productRecyclerView = findViewById(R.id.productRecyclerView)
                 productRecyclerView.layoutManager = LinearLayoutManager(this@ProductListActivity)
                 productRecyclerView.adapter = ProductAdapter(this@ProductListActivity, filteredProducts) { selectedProduct ->
-                    // TODO use only one function
-                    if (selectedProduct.dilutions.all { it.mode == null })
-                        showDilutionSelectionDialog(selectedProduct)
-                    else
-                        showDialogWithCategorizedItems(selectedProduct)
+                    if (selectedProduct.dilutions.size == 1) {
+                        setSelectedProductWithDilution(selectedProduct.dilutions[0], selectedProduct)
+                    } else {
+                        // TODO use only one function
+                        if (selectedProduct.dilutions.all { it.mode == null })
+                            showDilutionSelectionDialog(selectedProduct)
+                        else
+                            showDialogWithCategorizedItems(selectedProduct)
+                    }
                 }
             }
         }
     }
 
-    private fun getDescription(dilution: Dilution): String {
-        val valueDescription = if (dilution.value == 0) "puro" else "1:${dilution.value}"
-        val minValueDescription = if (dilution.minValue == 0) "puro" else "1:${dilution.minValue}"
-        val dilutionValues = if (dilution.minValue != null) "$minValueDescription - $valueDescription" else valueDescription
-        return "${dilution.description} [$dilutionValues]"
+    private fun setSelectedProductWithDilution(selectedDilution: Dilution, selectedProductWithDilutions: ProductWithDilutions) {
+        val resultIntent = Intent().apply {
+            putExtra("selectedDilution", selectedDilution)
+            putExtra("selectedProductWithDilutions", selectedProductWithDilutions)
+        }
+        setResult(RESULT_OK, resultIntent)
+        finish()
     }
 
     private fun showDilutionSelectionDialog(productWithDilutions: ProductWithDilutions) {
@@ -96,13 +103,7 @@ class ProductListActivity : AppCompatActivity() {
             .setTitle("Diluizioni per ${productWithDilutions.product.name}")
             .setNegativeButton("Annulla", null)
             .setItems(productWithDilutions.dilutions.map { getDescription(it) }.toTypedArray()) { _, which ->
-                val selectedDilution = productWithDilutions.dilutions[which]
-                val resultIntent = Intent().apply {
-                    putExtra("selectedDilution", selectedDilution.value)
-                    putExtra("productName", productWithDilutions.product.name)
-                }
-                setResult(RESULT_OK, resultIntent)
-                finish()
+                setSelectedProductWithDilution(productWithDilutions.dilutions[which], productWithDilutions)
             }
             .show()
     }
@@ -138,12 +139,7 @@ class ProductListActivity : AppCompatActivity() {
 
         // Imposta il listener per il click sui bambini (elementi)
         expandableListView.setOnChildClickListener { _, _, groupPosition, childPosition, _ ->
-            val selectedDilution = items[groupPosition][childPosition]
-            val resultIntent = Intent().apply {
-                putExtra("selectedDilution", selectedDilution.value)
-            }
-            setResult(RESULT_OK, resultIntent)
-            finish()
+            setSelectedProductWithDilution(items[groupPosition][childPosition], productWithDilutions)
             true
         }
 

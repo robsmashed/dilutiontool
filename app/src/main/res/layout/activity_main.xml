@@ -139,9 +139,69 @@
         android:paddingBottom="30dp"
         android:paddingTop="10dp"/>
 
-    <Button
+    <LinearLayout
+        android:id="@+id/productContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Scegli prodotto"
-        android:id="@+id/selectProductButton"/>
+        android:layout_height="130dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@drawable/dashed_border">
+
+        <TextView
+            android:id="@+id/noSelectedProductLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Seleziona un prodotto"
+            android:textSize="18sp"/>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/selectedProductContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp">
+            <ImageView
+                android:id="@+id/selectedProductImage"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
+                android:layout_gravity="center"
+                android:src="@drawable/default_image" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/selectedProductName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text="Product Name" />
+
+                <TextView
+                    android:id="@+id/selectedProductDescription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:text="Product Description"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/selectedProductLinkTextView"
+                    android:paddingTop="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Product link"
+                    android:textColor="@color/link_color" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
 </LinearLayout>
