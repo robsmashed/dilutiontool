@@ -63,6 +63,10 @@ class MainActivity : AppCompatActivity() {
             selectedProductLinkTextView.text = spannableString
             selectedProductLinkTextView.movementMethod = LinkMovementMethod.getInstance()
 
+            if (selectedProductWithDilutions.product.link.isBlank()) {
+                selectedProductLinkTextView.visibility = View.INVISIBLE
+            }
+
             // Usa Glide per caricare l'immagine
             Glide.with(this)
                 .load(selectedProductWithDilutions.product.imageUrl)

@@ -1,0 +1,102 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Sezione Prodotto -->
+        <EditText
+            android:id="@+id/productNameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nome Prodotto" />
+
+        <EditText
+            android:id="@+id/productDescriptionInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Descrizione Prodotto" />
+
+        <EditText
+            android:id="@+id/productImageUrlInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="URL Immagine Prodotto" />
+
+        <EditText
+            android:id="@+id/productLinkInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Link Prodotto" />
+
+        <!-- Sezione Diluzioni -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Diluzioni"
+            android:textSize="18sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp" />
+
+        <!-- Input per aggiungere una diluizione -->
+        <EditText
+            android:id="@+id/dilutionDescriptionInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Descrizione Diluzione" />
+
+        <!-- Layout orizzontale per "1:" e l'input del valore di diluizione -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Campo di input per il valore di diluizione con hint aggiornato -->
+            <EditText
+                android:id="@+id/dilutionInput"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:hint="0"
+                android:inputType="numberDecimal"
+                android:gravity="center"/>
+
+            <!-- Testo fisso "1:" per indicare la diluizione -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=":1"
+                android:textSize="16sp"
+                android:gravity="center_vertical"
+                android:paddingEnd="4dp"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/addDilutionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aggiungi Diluzione" />
+
+        <!-- Layout per mostrare le diluzioni aggiunte -->
+        <LinearLayout
+            android:id="@+id/dilutionListLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:padding="8dp">
+        </LinearLayout>
+
+        <!-- Pulsante per salvare il prodotto -->
+        <Button
+            android:id="@+id/saveProductButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Salva Prodotto" />
+
+    </LinearLayout>
+</ScrollView>

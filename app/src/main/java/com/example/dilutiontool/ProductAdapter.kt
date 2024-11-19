@@ -16,11 +16,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.dilutiontool.entity.ProductWithDilutions
 
-// Adapter per il RecyclerView
 class ProductAdapter(
     private val context: Context,
     private var productsWithDilutions: List<ProductWithDilutions>,
-    private val onItemClick: (ProductWithDilutions) -> Unit
+    private val onItemClick: (ProductWithDilutions) -> Unit,
+    private val onLongItemClick: (ProductWithDilutions) -> Boolean
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     // Metodo per aggiornare la lista dei prodotti
@@ -74,8 +74,18 @@ class ProductAdapter(
                 .error(R.drawable.product_loading)
                 .into(productImageView)
 
+            // Gestisci il normale click
             itemView.setOnClickListener {
                 onItemClick(productWithDilution) // Chiamato quando il prodotto viene selezionato
+            }
+
+            // Gestisci il long click
+            itemView.setOnLongClickListener {
+                onLongItemClick(productWithDilution) // Chiamato quando il prodotto viene selezionato
+            }
+
+            if (productWithDilution.product.link.isBlank()) {
+                productLinkTextView.visibility = View.INVISIBLE
             }
         }
     }

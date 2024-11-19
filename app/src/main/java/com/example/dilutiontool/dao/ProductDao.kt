@@ -13,10 +13,10 @@ import com.example.dilutiontool.entity.ProductWithDilutions
 interface ProductDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertProduct(product: Product)
+    fun insertProduct(product: Product): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertProducts(products: List<Product>)
+    fun insertProducts(products: List<Product>): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertDilutions(dilutions: List<Dilution>)
@@ -29,13 +29,27 @@ interface ProductDao {
     fun getAllProductsWithDilutions(): List<ProductWithDilutions>
 
     @Transaction
-    @Query("SELECT * FROM product_table ORDER BY name ASC")
+    @Query("SELECT * FROM product_table ORDER BY name COLLATE NOCASE ASC")
     fun getAllProductsWithDilutionsSortedByNameAsc(): List<ProductWithDilutions>
 
     @Transaction
-    @Query("SELECT * FROM product_table ORDER BY name DESC")
+    @Query("SELECT * FROM product_table ORDER BY name COLLATE NOCASE DESC")
     fun getAllProductsWithDilutionsSortedByNameDesc(): List<ProductWithDilutions>
 
     @Query("SELECT COUNT(*) FROM product_table")
     fun getProductCount(): Int
+
+    @Transaction
+    @Query("DELETE FROM dilution_table WHERE productId = :productId")
+    fun deleteDilutionsForProduct(productId: Long)
+
+    @Transaction
+    @Query("DELETE FROM product_table WHERE id = :productId")
+    fun deleteProduct(productId: Long)
+
+    @Transaction
+    fun deleteProductAndDilutions(productWithDilution: ProductWithDilutions) {
+        deleteDilutionsForProduct(productWithDilution.product.id)
+        deleteProduct(productWithDilution.product.id)
+    }
 }

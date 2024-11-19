@@ -8,6 +8,7 @@ import android.widget.ExpandableListView
 import android.widget.SearchView
 import android.widget.SimpleExpandableListAdapter
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,6 +27,13 @@ class ProductListActivity : AppCompatActivity() {
     private lateinit var products: List<ProductWithDilutions>
     private lateinit var filteredProducts: List<ProductWithDilutions>
     private lateinit var productRecyclerView: RecyclerView
+
+    val activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            getProducts()
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,11 +68,16 @@ class ProductListActivity : AppCompatActivity() {
         val fabAddProduct: FloatingActionButton = findViewById(R.id.fab)
 
         fabAddProduct.setOnClickListener {
-            Toast.makeText(this, "Funzionalità in arrivo", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, ProductAddActivity::class.java)
+            activityResultLauncher.launch(intent)
         }
 
         db = getDatabase(this)
 
+        getProducts();
+    }
+
+    private fun getProducts() {
         val executor = Executors.newSingleThreadExecutor()
         executor.execute {
             //populateDatabase(db)
@@ -74,17 +87,50 @@ class ProductListActivity : AppCompatActivity() {
             runOnUiThread {
                 productRecyclerView = findViewById(R.id.productRecyclerView)
                 productRecyclerView.layoutManager = LinearLayoutManager(this@ProductListActivity)
-                productRecyclerView.adapter = ProductAdapter(this@ProductListActivity, filteredProducts) { selectedProduct ->
-                    if (selectedProduct.dilutions.size == 1) {
-                        setSelectedProductWithDilution(selectedProduct.dilutions[0], selectedProduct)
-                    } else {
-                        // TODO use only one function
-                        if (selectedProduct.dilutions.all { it.mode == null })
-                            showDilutionSelectionDialog(selectedProduct)
-                        else
-                            showDialogWithCategorizedItems(selectedProduct)
-                    }
-                }
+                productRecyclerView.adapter =
+                    ProductAdapter(this@ProductListActivity, filteredProducts, { selectedProduct ->
+                        if (selectedProduct.dilutions.size == 1) {
+                            setSelectedProductWithDilution(
+                                selectedProduct.dilutions[0],
+                                selectedProduct
+                            )
+                        } else {
+                            // TODO use only one function
+                            if (selectedProduct.dilutions.all { it.mode == null })
+                                showDilutionSelectionDialog(selectedProduct)
+                            else
+                                showDialogWithCategorizedItems(selectedProduct)
+                        }
+                    },
+                        { selectedProduct ->
+                            // Questo è il long click handler
+                            val options = arrayOf("Modifica", "Cancella")
+                            val builder = android.app.AlertDialog.Builder(this@ProductListActivity)
+                            builder.setItems(options) { _, which ->
+                                when (which) {
+                                    0 -> {
+                                        // TODO Opzione "Modifica"
+                                    }
+                                    1 -> {
+                                        deleteProduct(selectedProduct)
+                                    }
+                                }
+                            }
+                            builder.show()
+                            true
+                        })
+            }
+        }
+    }
+
+    private fun deleteProduct(productWithDilutions: ProductWithDilutions) {
+        val executor = Executors.newSingleThreadExecutor()
+        executor.execute {
+            db.productDao().deleteProductAndDilutions(productWithDilutions)
+
+            runOnUiThread {
+                getProducts()
+                Toast.makeText(this, "Prodotto eliminato!", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -154,106 +200,98 @@ class ProductListActivity : AppCompatActivity() {
     }
 
     private fun populateDatabase(db: AppDatabase) {
-        db.productDao().insertProducts(listOf(
+        val productIds = db.productDao().insertProducts(listOf(
             Product(
-                2763,
-                "LCDA SuperClean",
-                "SuperClean è un potente detergente colloidale, ideale per pulire cerchi, motori e superfici delicate come la pelle.",
-                "https://www.lacuradellauto.it/web/image/product.product/3658/image_1920/lcdasc-lcda-superclean",
-                "https://www.lacuradellauto.it/2763-lcda-superclean"
+                name = "LCDA SuperClean",
+                description = "SuperClean è un potente detergente colloidale, ideale per pulire cerchi, motori e superfici delicate come la pelle.",
+                imageUrl = "https://www.lacuradellauto.it/web/image/product.product/3658/image_1920/lcdasc-lcda-superclean",
+                link = "https://www.lacuradellauto.it/2763-lcda-superclean"
             ),
             Product(
-                2784,
-                "Labocosmetica Semper",
-                "Semper è uno shampoo neutro di mantenimento, super concentrato e fortemente lubrificato.",
-                "https://www.lacuradellauto.it/web/image/product.product/3701/image_1024/mixlabsem-labocosmetica-semper-shampoo-neutro",
-                "https://www.lacuradellauto.it/2784-labocosmetica-semper-shampoo-neutro"
+                name = "Labocosmetica Semper",
+                description = "Semper è uno shampoo neutro di mantenimento, super concentrato e fortemente lubrificato.",
+                imageUrl = "https://www.lacuradellauto.it/web/image/product.product/3701/image_1024/mixlabsem-labocosmetica-semper-shampoo-neutro",
+                link = "https://www.lacuradellauto.it/2784-labocosmetica-semper-shampoo-neutro"
             ),
             Product(
-                2841,
-                "Labocosmetica Derma Cleaner",
-                "DÈRMA CLEANER 2.0 DI Labocosmetica è semplicemente il prodotto più completo per la cura della pelle",
-                "https://www.lacuradellauto.it/web/image/product.product/3835/image_1024/mixlabder-labocosmetica-derma-cleaner-pulitore-pelle?unique=570e27b",
-                "https://www.lacuradellauto.it/2841-labocosmetica-derma-cleaner-pulitore-pelle#attr=2345429"
+                name = "Labocosmetica Derma Cleaner",
+                description = "DÈRMA CLEANER 2.0 DI Labocosmetica è semplicemente il prodotto più completo per la cura della pelle",
+                imageUrl = "https://www.lacuradellauto.it/web/image/product.product/3835/image_1024/mixlabder-labocosmetica-derma-cleaner-pulitore-pelle?unique=570e27b",
+                link = "https://www.lacuradellauto.it/2841-labocosmetica-derma-cleaner-pulitore-pelle#attr=2345429"
             ),
             Product(
-                3034,
-                "Labocosmetica Primus",
-                "PRÌMUS 2.0 di Labocosmetica è un prelavaggio avanzato per auto e moto, migliorato per offrire prestazioni superiori in termini di pulizia e sicurezza.",
-                "https://www.lacuradellauto.it/web/image/product.product/4339/image_1024/mixlabpri-labocosmetica-primus-prewash?unique=33ca8ef",
-                "https://www.lacuradellauto.it/3034-labocosmetica-primus-prewash#attr=2345706"
+                name = "Labocosmetica Primus",
+                description = "PRÌMUS 2.0 di Labocosmetica è un prelavaggio avanzato per auto e moto, migliorato per offrire prestazioni superiori in termini di pulizia e sicurezza.",
+                imageUrl = "https://www.lacuradellauto.it/web/image/product.product/4339/image_1024/mixlabpri-labocosmetica-primus-prewash?unique=33ca8ef",
+                link = "https://www.lacuradellauto.it/3034-labocosmetica-primus-prewash#attr=2345706"
             ),
             Product(
-                2899,
-                "Labocosmetica Omnia",
-                "Omnia è un pulitore per interni auto di nuova generazione, ideale per pulire tessuti, pelle, plastiche, moquette, guarnizioni e gomme, senza rischi per le superfici più delicate.",
-                "https://www.lacuradellauto.it/web/image/product.product/3968/image_1024/mixlabom-labocosmetica-omnia-interior-cleaner?unique=422d44d",
-                "https://www.lacuradellauto.it/2899-labocosmetica-omnia-interior-cleaner#attr=2345691"
+                name = "Labocosmetica Omnia",
+                description = "Omnia è un pulitore per interni auto di nuova generazione, ideale per pulire tessuti, pelle, plastiche, moquette, guarnizioni e gomme, senza rischi per le superfici più delicate.",
+                imageUrl = "https://www.lacuradellauto.it/web/image/product.product/3968/image_1024/mixlabom-labocosmetica-omnia-interior-cleaner?unique=422d44d",
+                link = "https://www.lacuradellauto.it/2899-labocosmetica-omnia-interior-cleaner#attr=2345691"
             ),
             Product(
-                4110,
-                "Labocosmetica Idrosave",
-                "Labocosmetica Idrosave è uno shampoo innovativo che lava, lucida e protegge in un'unica operazione, senza necessità di risciacquo.",
-                "https://www.lacuradellauto.it/web/image/product.product/6120/image_1024/mixlabidro-labocosmetica-idrosave-rinseless-waterless-shampoo?unique=a9aadd4",
-                "https://www.lacuradellauto.it/4110-labocosmetica-idrosave-rinseless-waterless-shampoo#attr=2346091"
+                name = "Labocosmetica Idrosave",
+                description = "Labocosmetica Idrosave è uno shampoo innovativo che lava, lucida e protegge in un'unica operazione, senza necessità di risciacquo.",
+                imageUrl = "https://www.lacuradellauto.it/web/image/product.product/6120/image_1024/mixlabidro-labocosmetica-idrosave-rinseless-waterless-shampoo?unique=a9aadd4",
+                link = "https://www.lacuradellauto.it/4110-labocosmetica-idrosave-rinseless-waterless-shampoo#attr=2346091"
             ),
             Product(
-                1980,
-                "Labocosmetica Energo",
-                "Energo è un prodotto specializzato nella rimozione di tracce di calcare e residui di piogge acide da vetri e carrozzeria.",
-                "https://www.lacuradellauto.it/web/image/product.product/2681/image_1024/lab08-labocosmetica-energo-decontaminante-calcare-250-ml?unique=860b690",
-                "https://www.lacuradellauto.it/1980-labocosmetica-energo-decontaminante-calcare-250-ml"
+                name = "Labocosmetica Energo",
+                description = "Energo è un prodotto specializzato nella rimozione di tracce di calcare e residui di piogge acide da vetri e carrozzeria.",
+                imageUrl = "https://www.lacuradellauto.it/web/image/product.product/2681/image_1024/lab08-labocosmetica-energo-decontaminante-calcare-250-ml?unique=860b690",
+                link = "https://www.lacuradellauto.it/1980-labocosmetica-energo-decontaminante-calcare-250-ml"
             ),
             Product(
-                2195,
-                "Gyeon Q2M Preserve",
-                "Q²M Preserve è un prodotto rapido e semplice per ripristinare finiture interne leggermente sbiadite e proteggere altre superfici dall'usura.",
-                "https://www.lacuradellauto.it/web/image/product.product/2897/image_1024/g093-gyeon-q2m-preserve-250-ml?unique=a49fe6b",
-                "https://www.lacuradellauto.it/2195-gyeon-q2m-preserve-250-ml"
+                name = "Gyeon Q2M Preserve",
+                description = "Q²M Preserve è un prodotto rapido e semplice per ripristinare finiture interne leggermente sbiadite e proteggere altre superfici dall'usura.",
+                imageUrl = "https://www.lacuradellauto.it/web/image/product.product/2897/image_1024/g093-gyeon-q2m-preserve-250-ml?unique=a49fe6b",
+                link = "https://www.lacuradellauto.it/2195-gyeon-q2m-preserve-250-ml"
             ),
             Product(
-                2928,
-                "Labocosmetica Purifica",
-                "Purifica è il primo shampoo acido al mondo nel settore del car detailing, creato da Labocosmetica.",
-                "https://www.lacuradellauto.it/web/image/product.product/4052/image_1024/mixlabpf-labocosmetica-purifica-shampoo-acido-anti-calcare?unique=8dc3aa7",
-                "https://www.lacuradellauto.it/2928-labocosmetica-purifica-shampoo-acido-anti-calcare.html"
+                name = "Labocosmetica Purifica",
+                description = "Purifica è il primo shampoo acido al mondo nel settore del car detailing, creato da Labocosmetica.",
+                imageUrl = "https://www.lacuradellauto.it/web/image/product.product/4052/image_1024/mixlabpf-labocosmetica-purifica-shampoo-acido-anti-calcare?unique=8dc3aa7",
+                link = "https://www.lacuradellauto.it/2928-labocosmetica-purifica-shampoo-acido-anti-calcare.html"
             ),
         ))
+
         db.productDao().insertDilutions(listOf(
-            Dilution(productId = 2763, description = "Sporco grave", value = 5, minValue = 1),
-            Dilution(productId = 2763, description = "Sporco medio", value = 10),
-            Dilution(productId = 2763, description = "Sporco leggero", value = 20),
+            Dilution(productId = productIds[0], description = "Sporco grave", value = 5, minValue = 1),
+            Dilution(productId = productIds[0], description = "Sporco medio", value = 10),
+            Dilution(productId = productIds[0], description = "Sporco leggero", value = 20),
 
-            Dilution(productId = 2784, description = "Sporco ostinato", value = 800),
-            Dilution(productId = 2784, description = "Sporco medio", value = 1000),
-            Dilution(productId = 2784, description = "Sporco leggero", value = 1200),
+            Dilution(productId = productIds[1], description = "Sporco ostinato", value = 800),
+            Dilution(productId = productIds[1], description = "Sporco medio", value = 1000),
+            Dilution(productId = productIds[1], description = "Sporco leggero", value = 1200),
 
-            Dilution(productId = 2841, description = "Pulizia speciale", value = 0),
-            Dilution(productId = 2841, description = "Pulizia ordinaria", value = 1),
+            Dilution(productId = productIds[2], description = "Pulizia speciale", value = 0),
+            Dilution(productId = productIds[2], description = "Pulizia ordinaria", value = 1),
 
-            Dilution(productId = 3034, description = "Cerchi e gomme", value = 10, minValue = null, mode = "Spray"),
-            Dilution(productId = 3034, description = "Insetti e parte bassa/più sporca", value = 20, minValue = null, mode = "Spray"),
-            Dilution(productId = 3034, description = "Auto molto sporca", value = 50, minValue = null, mode = "Spray"),
-            Dilution(productId = 3034, description = "Auto mediamente sporca", value = 80, minValue = null, mode = "Spray"),
-            Dilution(productId = 3034, description = "Lavaggi frequenti", value = 100, minValue = null, mode = "Spray"),
-            Dilution(productId = 3034, description = "Sporco invernale o più ostinato", value = 5, minValue = null, mode = "Foam Gun"),
-            Dilution(productId = 3034, description = "Sporco estivo e mantenimento", value = 10, minValue = null, mode = "Foam Gun"),
-            Dilution(productId = 3034, description = "Come shampoo per condizioni di sporco ostinato", value = 100, minValue = null, mode = "Secchio"),
+            Dilution(productId = productIds[3], description = "Cerchi e gomme", value = 10, minValue = null, mode = "Spray"),
+            Dilution(productId = productIds[3], description = "Insetti e parte bassa/più sporca", value = 20, minValue = null, mode = "Spray"),
+            Dilution(productId = productIds[3], description = "Auto molto sporca", value = 50, minValue = null, mode = "Spray"),
+            Dilution(productId = productIds[3], description = "Auto mediamente sporca", value = 80, minValue = null, mode = "Spray"),
+            Dilution(productId = productIds[3], description = "Lavaggi frequenti", value = 100, minValue = null, mode = "Spray"),
+            Dilution(productId = productIds[3], description = "Sporco invernale o più ostinato", value = 5, minValue = null, mode = "Foam Gun"),
+            Dilution(productId = productIds[3], description = "Sporco estivo e mantenimento", value = 10, minValue = null, mode = "Foam Gun"),
+            Dilution(productId = productIds[3], description = "Come shampoo per condizioni di sporco ostinato", value = 100, minValue = null, mode = "Secchio"),
 
-            Dilution(productId = 2899, description = "Per sporchi difficili", value = 5),
-            Dilution(productId = 2899, description = "Come Quick Interior Detailer", value = 10),
+            Dilution(productId = productIds[4], description = "Per sporchi difficili", value = 5),
+            Dilution(productId = productIds[4], description = "Come Quick Interior Detailer", value = 10),
 
 
-            Dilution(productId = 4110, description = "Rinseless", value = 250),
-            Dilution(productId = 4110, description = "Waterless o come aiuto all’asciugatura", value = 100),
+            Dilution(productId = productIds[5], description = "Rinseless", value = 250),
+            Dilution(productId = productIds[5], description = "Waterless o come aiuto all’asciugatura", value = 100),
 
-            Dilution(productId = 1980, description = "Diluito da puro (per casi molto gravi) fino a 1:5", value = 5, minValue = 0),
+            Dilution(productId = productIds[6], description = "Diluito da puro (per casi molto gravi) fino a 1:5", value = 5, minValue = 0),
 
-            Dilution(productId = 2195, description = "Diluire fino a 1:5", value = 5, minValue = 0),
+            Dilution(productId = productIds[7], description = "Diluire fino a 1:5", value = 5, minValue = 0),
 
-            Dilution(productId = 2928, description = "Con Foam Gun", value = 10, minValue = 5),
-            Dilution(productId = 2928, description = "In secchio", value = 400, minValue = 100),
-            Dilution(productId = 2928, description = "In nebulizzatore", value = 200, minValue = 100),
+            Dilution(productId = productIds[8], description = "Con Foam Gun", value = 10, minValue = 5),
+            Dilution(productId = productIds[8], description = "In secchio", value = 400, minValue = 100),
+            Dilution(productId = productIds[8], description = "In nebulizzatore", value = 200, minValue = 100),
         ))
     }
 }
