@@ -8,87 +8,79 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Sezione Prodotto -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="4dp"
+            android:text="Nome"
+            android:textColor="#000000"
+            android:textSize="14sp" />
+
         <EditText
             android:id="@+id/productNameInput"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nome Prodotto" />
+            android:paddingBottom="4dp"
+            android:text="Descrizione"
+            android:textColor="#000000"
+            android:textSize="14sp" />
 
         <EditText
             android:id="@+id/productDescriptionInput"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Descrizione Prodotto" />
+            android:paddingBottom="4dp"
+            android:text="URL Immagine"
+            android:textColor="#000000"
+            android:textSize="14sp" />
 
         <EditText
             android:id="@+id/productImageUrlInput"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="URL Immagine Prodotto" />
+            android:paddingBottom="4dp"
+            android:text="Link esterno"
+            android:textColor="#000000"
+            android:textSize="14sp" />
 
         <EditText
             android:id="@+id/productLinkInput"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Link Prodotto" />
+            android:layout_height="wrap_content" />
 
-        <!-- Sezione Diluzioni -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Diluzioni"
-            android:textSize="18sp"
             android:paddingTop="16dp"
-            android:paddingBottom="8dp" />
+            android:paddingBottom="8dp"
+            android:text="Diluizioni"
+            android:textSize="18sp" />
 
-        <!-- Input per aggiungere una diluizione -->
-        <EditText
-            android:id="@+id/dilutionDescriptionInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Descrizione Diluzione" />
-
-        <!-- Layout orizzontale per "1:" e l'input del valore di diluizione -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <!-- Campo di input per il valore di diluizione con hint aggiornato -->
-            <EditText
-                android:id="@+id/dilutionInput"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:hint="0"
-                android:inputType="numberDecimal"
-                android:gravity="center"/>
-
-            <!-- Testo fisso "1:" per indicare la diluizione -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=":1"
-                android:textSize="16sp"
-                android:gravity="center_vertical"
-                android:paddingEnd="4dp"/>
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/addDilutionButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Aggiungi Diluzione" />
-
-        <!-- Layout per mostrare le diluzioni aggiunte -->
+        <!-- Layout vuoto per mostrare le diluzioni aggiunte -->
         <LinearLayout
             android:id="@+id/dilutionListLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginTop="8dp"
-            android:padding="8dp">
-        </LinearLayout>
+        ></LinearLayout>
+
+        <Button
+            android:id="@+id/addDilutionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aggiungi diluizione" />
 
         <!-- Pulsante per salvare il prodotto -->
         <Button
@@ -96,7 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Salva Prodotto" />
+            android:text="Salva" />
 
     </LinearLayout>
 </ScrollView>

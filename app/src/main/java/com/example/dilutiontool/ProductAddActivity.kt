@@ -2,10 +2,10 @@ package com.example.dilutiontool
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.dilutiontool.data.database.AppDatabase
@@ -21,12 +21,9 @@ class ProductAddActivity : AppCompatActivity() {
     private lateinit var productDescriptionInput: EditText
     private lateinit var productImageUrlInput: EditText
     private lateinit var productLinkInput: EditText
-    private lateinit var dilutionDescriptionInput: EditText
-    private lateinit var dilutionInput: EditText
     private lateinit var dilutionListLayout: LinearLayout
     private lateinit var addDilutionButton: Button
     private lateinit var saveProductButton: Button
-    private val dilutionList = mutableListOf<Dilution>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,54 +33,66 @@ class ProductAddActivity : AppCompatActivity() {
         productDescriptionInput = findViewById(R.id.productDescriptionInput)
         productImageUrlInput = findViewById(R.id.productImageUrlInput)
         productLinkInput = findViewById(R.id.productLinkInput)
-        dilutionDescriptionInput = findViewById(R.id.dilutionDescriptionInput)
-        dilutionInput = findViewById(R.id.dilutionInput)
         dilutionListLayout = findViewById(R.id.dilutionListLayout)
         addDilutionButton = findViewById(R.id.addDilutionButton)
         saveProductButton = findViewById(R.id.saveProductButton)
 
-        addDilutionButton.setOnClickListener {
-            val descriptionText = dilutionDescriptionInput.text.toString()
-            val dilutionValue = dilutionInput.text.toString().toIntOrNull()
-
-            if (descriptionText.isNotEmpty() && dilutionValue != null) {
-                val dilution = Dilution(
-                    productId = 0,
-                    description = descriptionText,
-                    value = dilutionValue
-                )
-                dilutionList.add(dilution)
-                addDilutionToLayout(descriptionText, dilutionValue)
-                dilutionDescriptionInput.text.clear()
-                dilutionInput.text.clear()
-            } else {
-                Toast.makeText(this, "Inserisci una descrizione e una diluizione valida, es. 5:1", Toast.LENGTH_SHORT).show()
+        val productWithDilutions = intent.getParcelableExtra<ProductWithDilutions>("PRODUCT_WITH_DILUTIONS")
+        if (productWithDilutions != null) {
+            productWithDilutions.let {
+                productNameInput.setText(it.product.name)
+                productDescriptionInput.setText(it.product.description)
+                productImageUrlInput.setText(it.product.imageUrl)
+                productLinkInput.setText(it.product.link)
             }
+            productWithDilutions.dilutions.forEach { dilution -> addDilutionRow(dilution)}
+
+        } else {
+            addDilutionRow();
+        }
+
+        addDilutionButton.setOnClickListener {
+            addDilutionRow();
         }
 
         saveProductButton.setOnClickListener {
             val product = Product(
-                id = 0,
+                id = productWithDilutions?.product?.id ?: 0,
                 name = productNameInput.text.toString(),
                 description = productDescriptionInput.text.toString(),
                 imageUrl = productImageUrlInput.text.toString(),
                 link = productLinkInput.text.toString()
             )
-            val productWithDilutions = ProductWithDilutions(
-                product = product,
-                dilutions = dilutionList
-            )
-            saveProductWithDilutions(productWithDilutions)
-        }
-    }
 
-    private fun addDilutionToLayout(description: String, value: Int) {
-        val textView = TextView(this).apply {
-            text = "$description: 1:$value"
-            textSize = 16f
-            setPadding(8, 8, 8, 8)
+            val dilutions = mutableListOf<Dilution>()
+            for (i in 0 until dilutionListLayout.childCount) {
+                val dilutionRow = dilutionListLayout.getChildAt(i)
+                val dilutionValue = dilutionRow.findViewById<EditText>(R.id.dilutionInput).text.toString().toIntOrNull()
+                if (dilutionValue != null) {
+                    val dilution = Dilution(
+                        productId = 0, // Lo inseriamo in fase di salvataggio
+                        description = dilutionRow.findViewById<EditText>(R.id.dilutionDescriptionInput).text.toString(),
+                        value = dilutionValue
+                    )
+                    dilutions.add(dilution)
+                }
+            }
+
+            if (product.name.isEmpty() && dilutions.isEmpty()) {
+                Toast.makeText(this, "Inserisci un nome e almeno una diluizione valida", Toast.LENGTH_SHORT).show()
+            } else if (product.name.isEmpty()) {
+                Toast.makeText(this, "Inserisci un nome valido", Toast.LENGTH_SHORT).show()
+            } else if (dilutions.isEmpty()) {
+                Toast.makeText(this, "Inserisci almeno una diluizione valida", Toast.LENGTH_SHORT).show()
+            } else {
+                val productWithDilutions = ProductWithDilutions(
+                    product = product,
+                    dilutions = dilutions
+                )
+                saveProductWithDilutions(productWithDilutions)
+            }
         }
-        dilutionListLayout.addView(textView)
+
     }
 
     private fun saveProductWithDilutions(productWithDilutions: ProductWithDilutions) {
@@ -97,12 +106,12 @@ class ProductAddActivity : AppCompatActivity() {
 
                 // Ora inserisci le diluizioni, associandole all'ID del prodotto
                 val dilutions = productWithDilutions.dilutions.map {
-                    it.copy(productId = productId)  // Usa l'ID del prodotto generato
+                    it.copy(productId = productId)  // Usa l'ID del prodotto
                 }
-                db.productDao().insertDilutions(dilutions) // Inserisci le diluizioni nel database
+                db.productDao().deleteDilutionsForProduct(productId) // elimina quelle già esistenti, se ci sono
+                db.productDao().insertDilutions(dilutions) // Inserisci le nuove diluizioni nel database
 
                 runOnUiThread {
-                    Toast.makeText(this, "Prodotto aggiunto!", Toast.LENGTH_SHORT).show() // Mostra un messaggio di conferma
                     val resultIntent = Intent()
                     setResult(RESULT_OK, resultIntent)  // Imposta il risultato
                     finish()
@@ -111,5 +120,21 @@ class ProductAddActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "Inserisci un nome e una diluizione valida, es. 5:1", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun addDilutionRow(dilution: Dilution? = null) {
+        val newDilutionRow = LayoutInflater.from(this)
+            .inflate(R.layout.dilution_row_layout, dilutionListLayout, false)
+
+        newDilutionRow.findViewById<Button>(R.id.removeDilutionButton).setOnClickListener {
+            dilutionListLayout.removeView(newDilutionRow)
+        }
+
+        if (dilution != null) {
+            newDilutionRow.findViewById<EditText>(R.id.dilutionInput).setText(dilution.value.toString())
+            newDilutionRow.findViewById<EditText>(R.id.dilutionDescriptionInput).setText(dilution.description)
+        }
+
+        dilutionListLayout.addView(newDilutionRow)
     }
 }
