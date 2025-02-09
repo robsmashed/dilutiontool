@@ -100,18 +100,11 @@ class ProductListActivity : AppCompatActivity() {
                 productRecyclerView.layoutManager = LinearLayoutManager(this@ProductListActivity)
                 productRecyclerView.adapter =
                     ProductAdapter(this@ProductListActivity, filteredProducts, { selectedProduct ->
-                        if (selectedProduct.dilutions.size == 1) {
-                            setSelectedProductWithDilution(
-                                selectedProduct.dilutions[0],
-                                selectedProduct
-                            )
-                        } else {
-                            // TODO use only one function
-                            if (selectedProduct.dilutions.all { it.mode == null })
-                                showDilutionSelectionDialog(selectedProduct)
-                            else
-                                showDialogWithCategorizedItems(selectedProduct)
-                        }
+                        // TODO use only one dynamic dialog
+                        if (selectedProduct.dilutions.all { it.mode == null })
+                            showDilutionSelectionDialog(selectedProduct)
+                        else
+                            showDialogWithCategorizedItems(selectedProduct)
                     },
                         { selectedProduct ->
                             // Questo è il long click handler
