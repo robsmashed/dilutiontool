@@ -67,12 +67,17 @@ class ProductAddActivity : AppCompatActivity() {
             val dilutions = mutableListOf<Dilution>()
             for (i in 0 until dilutionListLayout.childCount) {
                 val dilutionRow = dilutionListLayout.getChildAt(i)
-                val dilutionValue = dilutionRow.findViewById<EditText>(R.id.dilutionInput).text.toString().toIntOrNull()
-                if (dilutionValue != null) {
+                var dilutionValue = dilutionRow.findViewById<EditText>(R.id.dilutionInput).text.toString().toIntOrNull()
+                var minDilutionValue = dilutionRow.findViewById<EditText>(R.id.minDilutionInput).text.toString().toIntOrNull()
+                if (dilutionValue != null || minDilutionValue != null) {
+                    if (dilutionValue != null && minDilutionValue != null && minDilutionValue > dilutionValue) {
+                        dilutionValue = minDilutionValue.also { minDilutionValue = dilutionValue }
+                    }
                     val dilution = Dilution(
-                        productId = 0, // Lo inseriamo in fase di salvataggio
+                        productId = 0, // Lo inseriamo poi in fase di saveProductWithDilutions
                         description = dilutionRow.findViewById<EditText>(R.id.dilutionDescriptionInput).text.toString(),
-                        value = dilutionValue
+                        value = dilutionValue ?: minDilutionValue ?: 0,
+                        minValue = minDilutionValue ?: dilutionValue ?: 0,
                     )
                     dilutions.add(dilution)
                 }
@@ -85,11 +90,10 @@ class ProductAddActivity : AppCompatActivity() {
             } else if (dilutions.isEmpty()) {
                 Toast.makeText(this, "Inserisci almeno una diluizione valida", Toast.LENGTH_SHORT).show()
             } else {
-                val productWithDilutions = ProductWithDilutions(
+                saveProductWithDilutions(ProductWithDilutions(
                     product = product,
                     dilutions = dilutions
-                )
-                saveProductWithDilutions(productWithDilutions)
+                ))
             }
         }
 
@@ -131,6 +135,7 @@ class ProductAddActivity : AppCompatActivity() {
         }
 
         if (dilution != null) {
+            newDilutionRow.findViewById<EditText>(R.id.minDilutionInput).setText(dilution.minValue.toString())
             newDilutionRow.findViewById<EditText>(R.id.dilutionInput).setText(dilution.value.toString())
             newDilutionRow.findViewById<EditText>(R.id.dilutionDescriptionInput).setText(dilution.description)
         }

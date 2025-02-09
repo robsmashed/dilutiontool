@@ -10,8 +10,8 @@ import kotlinx.parcelize.Parcelize
 data class Dilution(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val productId: Long, // Foreign key reference to Product
-    val description: String,
+    val description: String? = "",
     val value: Int,
-    val minValue: Int? = null,
+    val minValue: Int,
     val mode: String? = null
 ) : Parcelable

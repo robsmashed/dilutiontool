@@ -137,7 +137,7 @@ class ProductListActivity : AppCompatActivity() {
 
             runOnUiThread {
                 getProducts()
-                Toast.makeText(this, "Prodotto eliminato!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Il prodotto è stato rimosso", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -273,6 +273,18 @@ class ProductListActivity : AppCompatActivity() {
                     imageUrl = "https://www.lacuradellauto.it/web/image/product.product/4052/image_1024/mixlabpf-labocosmetica-purifica-shampoo-acido-anti-calcare?unique=8dc3aa7",
                     link = "https://www.lacuradellauto.it/2928-labocosmetica-purifica-shampoo-acido-anti-calcare.html"
                 ),
+                Product(
+                    name = "LCDA AriaPura",
+                    description = "LCDA Aria Pura è un detergente concentrato multiuso ad elevato potere pulente, ideale per tutte le superfici interne dell'auto. Contiene spore batteriche che continuano a combattere sporco e odori anche dopo la pulizia, neutralizzando odori sgradevoli come quelli di nicotina e ammoniaca.",
+                    imageUrl = "https://www.lacuradellauto.it/web/image/product.product/3655/image_1024/lcdaap-lcda-ariapura?unique=07dd277",
+                    link = "https://www.lacuradellauto.it/2762-lcda-ariapura.html"
+                ),
+                Product(
+                    name = "Good Stuff Sour Shampoo",
+                    description = "Sour Shampoo di Good Stuff è uno shampoo a pH acido (3,5) progettato per rimuovere contaminazioni minerali che riducono la brillantezza della carrozzeria e l'efficacia dei protettivi. Pulisce a fondo senza cere o polimeri, riattivando le protezioni applicate e rispettando tutte le superfici dell'auto.",
+                    imageUrl = "https://www.lacuradellauto.it/web/image/product.product/4215/image_1024/mixgsss-good-stuff-sour-shampoo?unique=07dd277",
+                    link = "https://www.lacuradellauto.it/2971-good-stuff-sour-shampoo"
+                ),
             )
         )
 
@@ -284,90 +296,92 @@ class ProductListActivity : AppCompatActivity() {
                     value = 5,
                     minValue = 1
                 ),
-                Dilution(productId = productIds[0], description = "Sporco medio", value = 10),
-                Dilution(productId = productIds[0], description = "Sporco leggero", value = 20),
+                Dilution(productId = productIds[0], description = "Sporco medio", value = 10, minValue = 10),
+                Dilution(productId = productIds[0], description = "Sporco leggero", value = 20, minValue = 20),
 
-                Dilution(productId = productIds[1], description = "Sporco ostinato", value = 800),
-                Dilution(productId = productIds[1], description = "Sporco medio", value = 1000),
-                Dilution(productId = productIds[1], description = "Sporco leggero", value = 1200),
+                Dilution(productId = productIds[1], description = "Sporco ostinato", value = 800, minValue = 800),
+                Dilution(productId = productIds[1], description = "Sporco medio", value = 1000, minValue = 1000),
+                Dilution(productId = productIds[1], description = "Sporco leggero", value = 1200, minValue = 1200),
 
-                Dilution(productId = productIds[2], description = "Pulizia speciale", value = 0),
-                Dilution(productId = productIds[2], description = "Pulizia ordinaria", value = 1),
+                Dilution(productId = productIds[2], description = "Pulizia speciale", value = 0, minValue = 0),
+                Dilution(productId = productIds[2], description = "Pulizia ordinaria", value = 1, minValue = 1),
 
                 Dilution(
                     productId = productIds[3],
                     description = "Cerchi e gomme",
                     value = 10,
-                    minValue = null,
+                    minValue = 10,
                     mode = "Spray"
                 ),
                 Dilution(
                     productId = productIds[3],
                     description = "Insetti e parte bassa/più sporca",
                     value = 20,
-                    minValue = null,
+                    minValue = 20,
                     mode = "Spray"
                 ),
                 Dilution(
                     productId = productIds[3],
                     description = "Auto molto sporca",
                     value = 50,
-                    minValue = null,
+                    minValue = 50,
                     mode = "Spray"
                 ),
                 Dilution(
                     productId = productIds[3],
                     description = "Auto mediamente sporca",
                     value = 80,
-                    minValue = null,
+                    minValue = 80,
                     mode = "Spray"
                 ),
                 Dilution(
                     productId = productIds[3],
                     description = "Lavaggi frequenti",
                     value = 100,
-                    minValue = null,
+                    minValue = 100,
                     mode = "Spray"
                 ),
                 Dilution(
                     productId = productIds[3],
                     description = "Sporco invernale o più ostinato",
                     value = 5,
-                    minValue = null,
+                    minValue = 5,
                     mode = "Foam Gun"
                 ),
                 Dilution(
                     productId = productIds[3],
                     description = "Sporco estivo e mantenimento",
                     value = 10,
-                    minValue = null,
+                    minValue = 10,
                     mode = "Foam Gun"
                 ),
                 Dilution(
                     productId = productIds[3],
                     description = "Come shampoo per condizioni di sporco ostinato",
                     value = 100,
-                    minValue = null,
+                    minValue = 100,
                     mode = "Secchio"
                 ),
 
                 Dilution(
                     productId = productIds[4],
                     description = "Per sporchi difficili",
-                    value = 5
+                    value = 5,
+                    minValue = 5,
                 ),
                 Dilution(
                     productId = productIds[4],
                     description = "Come Quick Interior Detailer",
-                    value = 10
+                    value = 10,
+                    minValue = 10
                 ),
 
-
-                Dilution(productId = productIds[5], description = "Rinseless", value = 250),
+                Dilution(productId = productIds[5], description = "Rinseless", value = 250, minValue = 250),
                 Dilution(
                     productId = productIds[5],
                     description = "Waterless o come aiuto all’asciugatura",
-                    value = 100
+                    value = 100,
+                    minValue = 100
                 ),
 
                 Dilution(
@@ -379,7 +393,6 @@ class ProductListActivity : AppCompatActivity() {
 
                 Dilution(
                     productId = productIds[7],
-                    description = "Diluire fino a 1:5",
                     value = 5,
                     minValue = 0
                 ),
@@ -401,6 +414,31 @@ class ProductListActivity : AppCompatActivity() {
                     description = "In nebulizzatore",
                     value = 200,
                     minValue = 100
+                ),
+
+                Dilution(
+                    productId = productIds[9],
+                    description = "Sporco grave",
+                    value = 5,
+                    minValue = 1
+                ),
+                Dilution(
+                    productId = productIds[9],
+                    description = "Sporco medio",
+                    value = 10,
+                    minValue = 5
+                ),
+                Dilution(
+                    productId = productIds[9],
+                    description = "Sporco leggero e pulizia di mantenimento",
+                    value = 10,
+                    minValue = 10
+                ),
+
+                Dilution(
+                    productId = productIds[10],
+                    value = 500,
+                    minValue = 160
                 ),
             )
         )
