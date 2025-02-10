@@ -10,6 +10,7 @@ import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.view.View
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -28,8 +29,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedProductDescriptionTextView: TextView
     private lateinit var selectedProductImageView: ImageView
     private lateinit var selectedProductLinkTextView: TextView
+    var isProgrammaticChange = false // Flag per sapere se il cambiamento è programmatico
 
-    // Dichiarazione di ActivityResultLauncher
     private val productSelectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -67,7 +68,6 @@ class MainActivity : AppCompatActivity() {
                 selectedProductLinkTextView.visibility = View.INVISIBLE
             }
 
-            // Usa Glide per caricare l'immagine
             Glide.with(this)
                 .load(selectedProductWithDilutions.product.imageUrl)
                 .placeholder(R.drawable.product_loading)
@@ -91,47 +91,114 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        dilutionRatioEditText = findViewById(R.id.dilutionRatio)
-        val totalLiquidEditText = findViewById<EditText>(R.id.totalLiquid)
-        val resultText = findViewById<TextView>(R.id.resultText)
-        val waterResultText = findViewById<TextView>(R.id.waterResultText)
+        dilutionRatioEditText = findViewById(R.id.dilutionRatioEditText)
+        val totalLiquidEditText = findViewById<EditText>(R.id.totalLiquidEditText)
+        val resultText = findViewById<EditText>(R.id.resultText)
+        val waterResultText = findViewById<EditText>(R.id.waterResultText)
         productContainer = findViewById(R.id.productContainer)
         selectedProductNameTextView = findViewById(R.id.selectedProductName)
         selectedProductDescriptionTextView = findViewById(R.id.selectedProductDescription)
         selectedProductImageView = findViewById(R.id.selectedProductImage)
         selectedProductLinkTextView = findViewById(R.id.selectedProductLinkTextView)
 
-        productContainer.setOnClickListener { launchProductListActivity() }
+        // Associa ogni CheckBox al relativo EditText in una mappa
+        val checkBoxEditTextMap = mapOf(
+            findViewById<CheckBox>(R.id.totalLiquidLockCheckBox) to findViewById<EditText>(R.id.totalLiquidEditText),
+            findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox) to findViewById<EditText>(R.id.dilutionRatioEditText),
+            findViewById<CheckBox>(R.id.waterResultTextLockCheckBox) to findViewById<EditText>(R.id.waterResultText),
+            findViewById<CheckBox>(R.id.resultTextLockCheckBox) to findViewById<EditText>(R.id.resultText)
+        )
+        val checkBoxes = listOf(
+            findViewById<CheckBox>(R.id.totalLiquidLockCheckBox),
+            findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox),
+            findViewById<CheckBox>(R.id.waterResultTextLockCheckBox),
+            findViewById<CheckBox>(R.id.resultTextLockCheckBox)
+        )
 
-        // Funzione per calcolare e aggiornare il risultato
-        fun calculateResult() {
-            val totalLiquid = totalLiquidEditText.text.toString().toDoubleOrNull() ?: 0.0
-            val dilutionRatio = dilutionRatioEditText.text.toString().toDoubleOrNull() ?: 0.0
+        checkBoxes.forEach { checkBox ->
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                // Se ci sono più di 2 CheckBox selezionate, disabilita le altre CheckBox non selezionate
+                if (checkBoxes.count { it.isChecked } >= 2) {
+                    checkBoxes.forEach { otherCheckBox ->
+                        if (!otherCheckBox.isChecked) {
+                            otherCheckBox.isEnabled = false
+                        }
+                    }
+                } else { // Riabilita tutte le CheckBox non selezionate se una CheckBox è deselezionata
+                    checkBoxes.forEach { otherCheckBox ->
+                        if (!otherCheckBox.isChecked) {
+                            otherCheckBox.isEnabled = true // Riabilita le CheckBox non selezionate
+                        }
+                    }
+                }
 
-            val concentrate = totalLiquid / (dilutionRatio + 1)
-            val water = totalLiquid - concentrate
-            val formattedConcentrate = String.format("%.1f", concentrate)
-            val formattedWater = String.format("%.1f", water)
-            resultText.text = "$formattedConcentrate ml"
-            waterResultText.text = "$formattedWater ml"
+                // Imposta isEnabled dell'EditText in base allo stato della CheckBox
+                val editText = checkBoxEditTextMap[checkBox]
+                editText?.isEnabled = isChecked
+            }
         }
 
-        // Aggiungi il TextWatcher agli EditText
+        productContainer.setOnClickListener { launchProductListActivity() }
+
+        fun calculateResult() {
+            var totalLiquid = totalLiquidEditText.text.toString().toDoubleOrNull() ?: 0.0
+            var dilutionRatio = dilutionRatioEditText.text.toString().toIntOrNull() ?: 0
+            var water = waterResultText.text.toString().toDoubleOrNull() ?: 0.0
+            var concentrate = resultText.text.toString().toDoubleOrNull() ?: 0.0
+
+            if (totalLiquidEditText.isEnabled && dilutionRatioEditText.isEnabled) {
+                concentrate = totalLiquid / (dilutionRatio + 1)
+                water = totalLiquid - concentrate
+                changeTextProgrammatically(resultText, formatNumber(concentrate))
+                changeTextProgrammatically(waterResultText, formatNumber(water))
+            } else if (totalLiquidEditText.isEnabled && waterResultText.isEnabled) {
+                // TODO
+            } else if (totalLiquidEditText.isEnabled && resultText.isEnabled) {
+                // TODO
+            } else if (dilutionRatioEditText.isEnabled && waterResultText.isEnabled) {
+                // TODO
+            } else if (dilutionRatioEditText.isEnabled && resultText.isEnabled) {
+                // TODO
+            } else if (resultText.isEnabled && waterResultText.isEnabled) {
+                // TODO
+            }
+        }
+
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                calculateResult()
+                if (!isProgrammaticChange) { // Cambiamento fatto dall'utente
+                    calculateResult()
+                }
 
                 if (currentFocus == dilutionRatioEditText) {
-                    // Valuta se aggiungere un warning se il range di diluizione attuale (dilutionRatioEditText.text) non è compreso nel range di diluizione del prodotto selezionato
+                    // TODO Valuta cosa fare se il range di diluizione attuale (dilutionRatioEditText.text) non è compreso nel range di diluizione del prodotto selezionato
                 }
             }
         }
 
         dilutionRatioEditText.addTextChangedListener(textWatcher)
         totalLiquidEditText.addTextChangedListener(textWatcher)
+        waterResultText.addTextChangedListener(textWatcher)
+        resultText.addTextChangedListener(textWatcher)
+    }
 
-        calculateResult()
+    // Funzione per formattare i numeri
+    private fun formatNumber(value: Double): String {
+        return if (value == value.toInt().toDouble()) {
+            // Se il numero è "intero" (senza decimali significativi)
+            value.toInt().toString()  // Rimuove i decimali
+        } else {
+            // Se il numero è decimale
+            String.format("%.1f", value)  // Mostra un solo decimale
+        }
+    }
+
+    // Cambiamento programmatico
+    private fun changeTextProgrammatically(editText: EditText, newText: String) {
+        isProgrammaticChange = true
+        editText.setText(newText)
+        isProgrammaticChange = false
     }
 }
