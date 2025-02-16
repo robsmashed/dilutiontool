@@ -16,13 +16,14 @@ import com.example.dilutiontool.entity.ProductWithDilutions
 import java.util.concurrent.Executors
 
 class ProductAddActivity : AppCompatActivity() {
+    private var dilutionListLayouts: MutableMap<String, MutableList<LinearLayout>> = mutableMapOf()
 
     private lateinit var productNameInput: EditText
     private lateinit var productDescriptionInput: EditText
     private lateinit var productImageUrlInput: EditText
     private lateinit var productLinkInput: EditText
-    private lateinit var dilutionListLayout: LinearLayout
-    private lateinit var addDilutionButton: Button
+    private lateinit var dilutionGroups: LinearLayout
+    private lateinit var addDilutionGroupButton: Button
     private lateinit var saveProductButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,8 +34,8 @@ class ProductAddActivity : AppCompatActivity() {
         productDescriptionInput = findViewById(R.id.productDescriptionInput)
         productImageUrlInput = findViewById(R.id.productImageUrlInput)
         productLinkInput = findViewById(R.id.productLinkInput)
-        dilutionListLayout = findViewById(R.id.dilutionListLayout)
-        addDilutionButton = findViewById(R.id.addDilutionButton)
+        dilutionGroups = findViewById(R.id.dilutionGroups)
+        addDilutionGroupButton = findViewById(R.id.addDilutionGroupButton)
         saveProductButton = findViewById(R.id.saveProductButton)
 
         val productWithDilutions = intent.getParcelableExtra<ProductWithDilutions>("PRODUCT_WITH_DILUTIONS")
@@ -45,13 +46,17 @@ class ProductAddActivity : AppCompatActivity() {
                 productImageUrlInput.setText(it.product.imageUrl)
                 productLinkInput.setText(it.product.link)
             }
-            productWithDilutions.dilutions.forEach { dilution -> addDilutionRow(dilution)}
+
+            val groupedByMode: Map<String, List<Dilution>> = productWithDilutions.dilutions.groupBy { it.mode ?: "" }
+            groupedByMode.forEach { (mode, dilutionList) ->
+                addDilutionGroup(mode, dilutionList)
+            }
         } else {
-            addDilutionRow();
+            addDilutionGroup()
         }
 
-        addDilutionButton.setOnClickListener {
-            addDilutionRow();
+        addDilutionGroupButton.setOnClickListener {
+            addDilutionGroup()
         }
 
         saveProductButton.setOnClickListener {
@@ -64,21 +69,27 @@ class ProductAddActivity : AppCompatActivity() {
             )
 
             val dilutions = mutableListOf<Dilution>()
-            for (i in 0 until dilutionListLayout.childCount) {
-                val dilutionRow = dilutionListLayout.getChildAt(i)
-                var dilutionValue = dilutionRow.findViewById<EditText>(R.id.dilutionInput).text.toString().toIntOrNull()
-                var minDilutionValue = dilutionRow.findViewById<EditText>(R.id.minDilutionInput).text.toString().toIntOrNull()
-                if (dilutionValue != null || minDilutionValue != null) {
-                    if (dilutionValue != null && minDilutionValue != null && minDilutionValue > dilutionValue) {
-                        dilutionValue = minDilutionValue.also { minDilutionValue = dilutionValue }
+
+            dilutionListLayouts.forEach { (groupName, layoutList) ->
+                for (dilutionListLayout in layoutList) {
+                    for (i in 0 until dilutionListLayout.childCount) {
+                        val dilutionRow = dilutionListLayout.getChildAt(i)
+                        var dilutionValue = dilutionRow.findViewById<EditText>(R.id.dilutionInput).text.toString().toIntOrNull()
+                        var minDilutionValue = dilutionRow.findViewById<EditText>(R.id.minDilutionInput).text.toString().toIntOrNull()
+                        if (dilutionValue != null || minDilutionValue != null) {
+                            if (dilutionValue != null && minDilutionValue != null && minDilutionValue > dilutionValue) {
+                                dilutionValue = minDilutionValue.also { minDilutionValue = dilutionValue }
+                            }
+                            val dilution = Dilution(
+                                productId = 0, // Lo inseriamo poi in fase di saveProductWithDilutions
+                                description = dilutionRow.findViewById<EditText>(R.id.dilutionDescriptionInput).text.toString(),
+                                value = dilutionValue ?: minDilutionValue ?: 0,
+                                minValue = minDilutionValue ?: dilutionValue ?: 0,
+                                mode = groupName.ifEmpty { null },
+                            )
+                            dilutions.add(dilution)
+                        }
                     }
-                    val dilution = Dilution(
-                        productId = 0, // Lo inseriamo poi in fase di saveProductWithDilutions
-                        description = dilutionRow.findViewById<EditText>(R.id.dilutionDescriptionInput).text.toString(),
-                        value = dilutionValue ?: minDilutionValue ?: 0,
-                        minValue = minDilutionValue ?: dilutionValue ?: 0,
-                    )
-                    dilutions.add(dilution)
                 }
             }
 
@@ -125,9 +136,39 @@ class ProductAddActivity : AppCompatActivity() {
         }
     }
 
-    private fun addDilutionRow(dilution: Dilution? = null) {
-        val newDilutionRow = LayoutInflater.from(this)
-            .inflate(R.layout.dilution_row_layout, dilutionListLayout, false)
+    private fun addDilutionGroup(groupName: String = "", dilutions: List<Dilution> = emptyList()) {
+        val newDilutionsGroup = LayoutInflater.from(this).inflate(R.layout.dilution_group_layout, dilutionGroups, false)
+        newDilutionsGroup.findViewById<EditText>(R.id.dilutionGroupNameEditText).setText(groupName)
+
+        newDilutionsGroup.findViewById<Button>(R.id.removeDilutionGroupButton).setOnClickListener {
+            dilutionGroups.removeView(newDilutionsGroup)
+            dilutionListLayouts.remove(groupName)
+        }
+
+        val dilutionListLayout = newDilutionsGroup.findViewById<LinearLayout>(R.id.dilutionListLayout)
+
+        newDilutionsGroup.findViewById<Button>(R.id.addDilutionButton).setOnClickListener {
+            addDilutionRow(dilutionListLayout)
+        }
+
+        if (dilutions.isEmpty()) {
+            addDilutionRow(dilutionListLayout)
+        } else {
+            for (dilution in dilutions) {
+                addDilutionRow(dilutionListLayout, dilution)
+            }
+        }
+
+        if (dilutionListLayouts[groupName] === null) {
+            dilutionListLayouts[groupName] = mutableListOf()
+        }
+        dilutionListLayouts[groupName]?.add(dilutionListLayout)
+
+        dilutionGroups.addView(newDilutionsGroup)
+    }
+
+    private fun addDilutionRow(dilutionListLayout: LinearLayout, dilution: Dilution? = null) {
+        val newDilutionRow = LayoutInflater.from(this).inflate(R.layout.dilution_row_layout, dilutionListLayout, false)
 
         newDilutionRow.findViewById<Button>(R.id.removeDilutionButton).setOnClickListener {
             dilutionListLayout.removeView(newDilutionRow)
