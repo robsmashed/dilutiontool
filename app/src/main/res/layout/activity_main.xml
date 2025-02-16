@@ -43,7 +43,8 @@
         android:orientation="horizontal">
 
         <EditText
-            android:id="@+id/totalLiquidEditText"
+            android:text="0"
+            android:id="@+id/totalEditText"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:hint="0"
@@ -89,6 +90,7 @@
 
         <!-- Campo di input per il valore di diluizione con hint aggiornato -->
         <EditText
+            android:text="0"
             android:id="@+id/dilutionRatioEditText"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
@@ -131,7 +133,7 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:id="@+id/waterResultText"
+            android:id="@+id/waterEditText"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:hint="0"
@@ -175,7 +177,7 @@
         android:orientation="horizontal">
 
         <EditText
-            android:id="@+id/resultText"
+            android:id="@+id/concentrateEditText"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:hint="0"
