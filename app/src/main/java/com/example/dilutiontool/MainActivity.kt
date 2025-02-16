@@ -143,24 +143,24 @@ class MainActivity : AppCompatActivity() {
         productContainer.setOnClickListener { launchProductListActivity() }
 
         fun calculateResult(currentEditText: EditText) {
-            var totalLiquid = totalLiquidEditText.text.toString().toDoubleOrNull() ?: 0.0
-            var dilutionRatio = dilutionRatioEditText.text.toString().toDoubleOrNull() ?: 0.0
-            var water = waterEditText.text.toString().toDoubleOrNull() ?: 0.0
-            var concentrate = concentrateEditText.text.toString().toDoubleOrNull() ?: 0.0
+            var totalLiquid = getDoubleValue(totalLiquidEditText)
+            var dilutionRatio = getDoubleValue(dilutionRatioEditText)
+            var water = getDoubleValue(waterEditText)
+            var concentrate = getDoubleValue(concentrateEditText)
 
             if (totalLiquidEditText.isEnabled && dilutionRatioEditText.isEnabled) {
                 concentrate = totalLiquid / (dilutionRatio + 1)
                 water = totalLiquid - concentrate
-                changeTextProgrammatically(concentrateEditText, formatNumber(concentrate))
-                changeTextProgrammatically(waterEditText, formatNumber(water))
+                changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
+                changeTextProgrammatically(waterEditText, getStringValue(water))
             } else if (totalLiquidEditText.isEnabled && waterEditText.isEnabled) {
                 if (totalLiquid - water < 0) {
                     if (currentEditText !== waterEditText) {
                         water = totalLiquid
-                        changeTextProgrammatically(waterEditText, formatNumber(totalLiquid))
+                        changeTextProgrammatically(waterEditText, getStringValue(totalLiquid))
                     } else if (currentEditText !== totalLiquidEditText) {
                         totalLiquid = water
-                        changeTextProgrammatically(totalLiquidEditText, formatNumber(water))
+                        changeTextProgrammatically(totalLiquidEditText, getStringValue(water))
                     }
                 }
 
@@ -173,47 +173,54 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     water / concentrate
                 }
-                changeTextProgrammatically(concentrateEditText, formatNumber(concentrate))
-                changeTextProgrammatically(dilutionRatioEditText, formatNumber(dilutionRatio))
+                changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
+                changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
             } else if (totalLiquidEditText.isEnabled && concentrateEditText.isEnabled) {
                 if (totalLiquid - concentrate < 0) {
                     if (currentEditText !== totalLiquidEditText) {
                         totalLiquid = concentrate
-                        changeTextProgrammatically(totalLiquidEditText, formatNumber(concentrate))
+                        changeTextProgrammatically(totalLiquidEditText, getStringValue(concentrate))
                     } else if (currentEditText !== concentrateEditText) {
                         concentrate = totalLiquid
-                        changeTextProgrammatically(concentrateEditText, formatNumber(totalLiquid))
+                        changeTextProgrammatically(concentrateEditText, getStringValue(totalLiquid))
                     }
                 }
 
                 water = totalLiquid - concentrate
                 dilutionRatio = totalLiquid / concentrate - 1
-                changeTextProgrammatically(waterEditText, formatNumber(water))
-                changeTextProgrammatically(dilutionRatioEditText, formatNumber(dilutionRatio))
+                changeTextProgrammatically(waterEditText, getStringValue(water))
+                changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
             } else if (dilutionRatioEditText.isEnabled && waterEditText.isEnabled) {
                 if (dilutionRatio == 0.0) {
                     if (currentEditText !== waterEditText) {
                         water = 0.0
-                        changeTextProgrammatically(waterEditText, formatNumber(water))
+                        changeTextProgrammatically(waterEditText, getStringValue(water))
                         concentrate = totalLiquid;
-                        changeTextProgrammatically(concentrateEditText, formatNumber(totalLiquid))
+                        changeTextProgrammatically(concentrateEditText, getStringValue(totalLiquid))
                     } else if (currentEditText !== dilutionRatioEditText) {
                         water = 0.0
-                        changeTextProgrammatically(waterEditText, formatNumber(water))
+                        changeTextProgrammatically(waterEditText, getStringValue(water))
                         waterEditText.selectAll()
                         flashView(dilutionRatioEditText)
                     }
                 } else {
                     totalLiquid = (water / dilutionRatio) + water
                     concentrate = totalLiquid - water
-                    changeTextProgrammatically(totalLiquidEditText, formatNumber(totalLiquid))
-                    changeTextProgrammatically(concentrateEditText, formatNumber(concentrate))
+                    changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
+                    changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
                 }
             } else if (dilutionRatioEditText.isEnabled && concentrateEditText.isEnabled) {
-                totalLiquid = concentrate * (dilutionRatio + 1)
-                water = totalLiquid - concentrate
-                changeTextProgrammatically(totalLiquidEditText, formatNumber(totalLiquid))
-                changeTextProgrammatically(waterEditText, formatNumber(water))
+                if (dilutionRatio == Double.POSITIVE_INFINITY && currentEditText !== dilutionRatioEditText) {
+                    concentrate = 0.0
+                    changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
+                    concentrateEditText.selectAll()
+                    flashView(dilutionRatioEditText)
+                } else {
+                    totalLiquid = concentrate * (dilutionRatio + 1)
+                    water = totalLiquid - concentrate
+                    changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
+                    changeTextProgrammatically(waterEditText, getStringValue(water))
+                }
             } else if (concentrateEditText.isEnabled && waterEditText.isEnabled) {
                 totalLiquid = concentrate + water
                 dilutionRatio = water / concentrate
@@ -222,8 +229,8 @@ class MainActivity : AppCompatActivity() {
                     dilutionRatio = 0.0
                 }
 
-                changeTextProgrammatically(totalLiquidEditText, formatNumber(totalLiquid))
-                changeTextProgrammatically(dilutionRatioEditText, formatNumber(dilutionRatio))
+                changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
+                changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
             }
         }
 
@@ -257,7 +264,7 @@ class MainActivity : AppCompatActivity() {
         animation.start()
     }
 
-    private fun formatNumber(value: Double): String {
+    private fun getStringValue(value: Double): String {
         return when (value) {
             Double.POSITIVE_INFINITY -> "∞"  // Se il numero è infinito, ritorna "∞"
             value.toInt().toDouble() -> value.toInt().toString()  // Se il numero è intero, rimuove i decimali
@@ -271,6 +278,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun getDoubleValue(editText: EditText): Double {
+        var value = editText.text.toString().toDoubleOrNull() ?: 0.0
+        if (editText.text.toString().trim() == "∞") {
+            value = Double.POSITIVE_INFINITY
+        }
+        return value;
     }
 
     // Cambiamento programmatico
