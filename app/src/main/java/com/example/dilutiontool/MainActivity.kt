@@ -204,7 +204,7 @@ class MainActivity : AppCompatActivity() {
                         flashView(dilutionRatioEditText)
                     }
                 } else {
-                    totalLiquid = water * (dilutionRatio + 1)
+                    totalLiquid = (water / dilutionRatio) + water
                     concentrate = totalLiquid - water
                     changeTextProgrammatically(totalLiquidEditText, formatNumber(totalLiquid))
                     changeTextProgrammatically(concentrateEditText, formatNumber(concentrate))
