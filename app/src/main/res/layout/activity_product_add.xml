@@ -60,27 +60,42 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="16dp"
-            android:paddingBottom="8dp"
-            android:text="Diluizioni"
-            android:textSize="18sp" />
-
         <!-- Layout vuoto per mostrare le diluzioni aggiunte -->
         <LinearLayout
-            android:id="@+id/dilutionListLayout"
+            android:id="@+id/dilutionGroupLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/border"
             android:orientation="vertical"
-        ></LinearLayout>
+            android:padding="10dp">
+
+            <EditText
+                android:id="@+id/dilutionGroupNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp"
+                android:text="Diluizioni"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:id="@+id/dilutionListLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+
+            <Button
+                android:id="@+id/addDilutionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aggiungi diluizione" />
+        </LinearLayout>
 
         <Button
-            android:id="@+id/addDilutionButton"
+            android:id="@+id/addDilutionGroupButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Aggiungi diluizione" />
+            android:text="Aggiungi gruppo diluizioni" />
 
         <!-- Pulsante per salvare il prodotto -->
         <Button

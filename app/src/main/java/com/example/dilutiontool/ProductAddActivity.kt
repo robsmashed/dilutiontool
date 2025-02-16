@@ -46,7 +46,6 @@ class ProductAddActivity : AppCompatActivity() {
                 productLinkInput.setText(it.product.link)
             }
             productWithDilutions.dilutions.forEach { dilution -> addDilutionRow(dilution)}
-
         } else {
             addDilutionRow();
         }
