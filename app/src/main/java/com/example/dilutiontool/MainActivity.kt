@@ -21,6 +21,7 @@ import com.bumptech.glide.Glide
 import com.example.dilutiontool.DilutionUtils.getDescription
 import com.example.dilutiontool.entity.Dilution
 import com.example.dilutiontool.entity.ProductWithDilutions
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private lateinit var dilutionRatioEditText: EditText
@@ -115,26 +116,26 @@ class MainActivity : AppCompatActivity() {
             findViewById<CheckBox>(R.id.resultTextLockCheckBox)
         )
 
+        val editTexts = listOf(dilutionRatioEditText, totalLiquidEditText, waterResultText, resultText)
+
         checkBoxes.forEach { checkBox ->
             checkBox.setOnCheckedChangeListener { _, isChecked ->
-                // Se ci sono più di 2 CheckBox selezionate, disabilita le altre CheckBox non selezionate
                 if (checkBoxes.count { it.isChecked } >= 2) {
                     checkBoxes.forEach { otherCheckBox ->
                         if (!otherCheckBox.isChecked) {
-                            otherCheckBox.isEnabled = false
+                            otherCheckBox.isEnabled = false // Disabilita le altre CheckBox non selezionate
+                        } else {
+                            checkBoxEditTextMap[otherCheckBox]?.isEnabled = isChecked // Imposta isEnabled dell'EditText in base allo stato della CheckBox
                         }
                     }
-                } else { // Riabilita tutte le CheckBox non selezionate se una CheckBox è deselezionata
+                } else {
                     checkBoxes.forEach { otherCheckBox ->
+                        checkBoxEditTextMap[otherCheckBox]?.isEnabled = false
                         if (!otherCheckBox.isChecked) {
                             otherCheckBox.isEnabled = true // Riabilita le CheckBox non selezionate
                         }
                     }
                 }
-
-                // Imposta isEnabled dell'EditText in base allo stato della CheckBox
-                val editText = checkBoxEditTextMap[checkBox]
-                editText?.isEnabled = isChecked
             }
         }
 
@@ -142,7 +143,7 @@ class MainActivity : AppCompatActivity() {
 
         fun calculateResult() {
             var totalLiquid = totalLiquidEditText.text.toString().toDoubleOrNull() ?: 0.0
-            var dilutionRatio = dilutionRatioEditText.text.toString().toIntOrNull() ?: 0
+            var dilutionRatio = dilutionRatioEditText.text.toString().toDoubleOrNull() ?: 0.0
             var water = waterResultText.text.toString().toDoubleOrNull() ?: 0.0
             var concentrate = resultText.text.toString().toDoubleOrNull() ?: 0.0
 
@@ -152,36 +153,52 @@ class MainActivity : AppCompatActivity() {
                 changeTextProgrammatically(resultText, formatNumber(concentrate))
                 changeTextProgrammatically(waterResultText, formatNumber(water))
             } else if (totalLiquidEditText.isEnabled && waterResultText.isEnabled) {
-                // TODO
+                concentrate = totalLiquid - water
+                dilutionRatio = (totalLiquid - water) / water
+                changeTextProgrammatically(resultText, formatNumber(concentrate))
+                changeTextProgrammatically(dilutionRatioEditText, formatNumber(dilutionRatio))
             } else if (totalLiquidEditText.isEnabled && resultText.isEnabled) {
-                // TODO
+                water = totalLiquid - concentrate
+                dilutionRatio = totalLiquid / concentrate - 1
+                changeTextProgrammatically(waterResultText, formatNumber(water))
+                changeTextProgrammatically(dilutionRatioEditText, formatNumber(dilutionRatio))
             } else if (dilutionRatioEditText.isEnabled && waterResultText.isEnabled) {
-                // TODO
+                totalLiquid = water * (dilutionRatio + 1)
+                concentrate = totalLiquid - water
+                changeTextProgrammatically(totalLiquidEditText, formatNumber(totalLiquid))
+                changeTextProgrammatically(resultText, formatNumber(concentrate))
             } else if (dilutionRatioEditText.isEnabled && resultText.isEnabled) {
-                // TODO
+                totalLiquid = concentrate * (dilutionRatio + 1)
+                water = totalLiquid - concentrate
+                changeTextProgrammatically(totalLiquidEditText, formatNumber(totalLiquid))
+                changeTextProgrammatically(waterResultText, formatNumber(water))
             } else if (resultText.isEnabled && waterResultText.isEnabled) {
-                // TODO
+                totalLiquid = concentrate + water
+                dilutionRatio = concentrate / water
+                changeTextProgrammatically(totalLiquidEditText, formatNumber(totalLiquid))
+                changeTextProgrammatically(dilutionRatioEditText, formatNumber(dilutionRatio))
             }
         }
 
-        val textWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                if (!isProgrammaticChange) { // Cambiamento fatto dall'utente
-                    calculateResult()
+        editTexts.forEach { editText ->
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {
+                    if (!isProgrammaticChange) { // Cambiamento fatto dall'utente
+                        calculateResult()
+                    }
                 }
-
-                if (currentFocus == dilutionRatioEditText) {
-                    // TODO Valuta cosa fare se il range di diluizione attuale (dilutionRatioEditText.text) non è compreso nel range di diluizione del prodotto selezionato
+            })
+            editText.setOnFocusChangeListener { _, hasFocus ->
+                // Se l'EditText ha il focus, seleziona tutto il testo al suo interno
+                if (hasFocus) {
+                    editText.post {
+                        editText.selectAll()
+                    }
                 }
             }
         }
-
-        dilutionRatioEditText.addTextChangedListener(textWatcher)
-        totalLiquidEditText.addTextChangedListener(textWatcher)
-        waterResultText.addTextChangedListener(textWatcher)
-        resultText.addTextChangedListener(textWatcher)
     }
 
     // Funzione per formattare i numeri
@@ -191,7 +208,7 @@ class MainActivity : AppCompatActivity() {
             value.toInt().toString()  // Rimuove i decimali
         } else {
             // Se il numero è decimale
-            String.format("%.1f", value)  // Mostra un solo decimale
+            String.format(Locale.US, "%.1f", value)  // Mostra un solo decimale con punto
         }
     }
 

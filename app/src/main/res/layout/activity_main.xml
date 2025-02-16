@@ -93,7 +93,7 @@
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:hint="0"
-            android:inputType="number"
+            android:inputType="numberDecimal"
             android:gravity="center"/>
 
         <TextView
