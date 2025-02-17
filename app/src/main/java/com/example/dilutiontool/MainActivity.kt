@@ -10,6 +10,8 @@ import android.text.Spanned
 import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
@@ -18,6 +20,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import com.bumptech.glide.Glide
 import com.example.dilutiontool.DilutionUtils.getDescription
 import com.example.dilutiontool.entity.Dilution
@@ -89,9 +92,26 @@ class MainActivity : AppCompatActivity() {
         productSelectionLauncher.launch(intent)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         dilutionRatioEditText = findViewById(R.id.dilutionRatioEditText)
         val totalLiquidEditText = findViewById<EditText>(R.id.totalEditText)

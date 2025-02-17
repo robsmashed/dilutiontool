@@ -3,6 +3,8 @@ package com.example.dilutiontool
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
 import android.widget.ExpandableListView
 import android.widget.SearchView
@@ -11,6 +13,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.dilutiontool.DilutionUtils.getDescription
@@ -23,6 +26,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.concurrent.Executors
 
 class ProductListActivity : AppCompatActivity() {
+    private val PICK_FILE_REQUEST_CODE = 1
     private lateinit var db: AppDatabase
     private lateinit var products: List<ProductWithDilutions>
     private lateinit var filteredProducts: List<ProductWithDilutions>
@@ -35,10 +39,37 @@ class ProductListActivity : AppCompatActivity() {
             }
         }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_product_list, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_import -> {
+                val intent = Intent(Intent.ACTION_GET_CONTENT)
+                intent.type = "application/xml"
+                startActivityForResult(intent, PICK_FILE_REQUEST_CODE)
+                true
+            }
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_list)
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        // Aggiungi l'icona di ritorno (freccia) alla Toolbar
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.baseline_arrow_back_ios_24)
 
         val searchView = findViewById<SearchView>(R.id.searchView)
         searchView.setIconifiedByDefault(false) // Espandi la SearchView di default
