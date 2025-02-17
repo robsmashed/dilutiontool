@@ -101,7 +101,7 @@ class ProductListActivity : AppCompatActivity() {
                 productRecyclerView.adapter =
                     ProductAdapter(this@ProductListActivity, filteredProducts, { selectedProduct ->
                         // TODO use only one dynamic dialog
-                        if (selectedProduct.dilutions.all { it.mode == selectedProduct.dilutions.first().mode })
+                        if (selectedProduct.dilutions.all { it.mode == null })
                             showDilutionSelectionDialog(selectedProduct)
                         else
                             showDialogWithCategorizedItems(selectedProduct)
