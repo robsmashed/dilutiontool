@@ -101,7 +101,7 @@ class ProductListActivity : AppCompatActivity() {
                 productRecyclerView.adapter =
                     ProductAdapter(this@ProductListActivity, filteredProducts, { selectedProduct ->
                         // TODO use only one dynamic dialog
-                        if (selectedProduct.dilutions.all { it.mode == null })
+                        if (selectedProduct.dilutions.all { it.mode == selectedProduct.dilutions.first().mode })
                             showDilutionSelectionDialog(selectedProduct)
                         else
                             showDialogWithCategorizedItems(selectedProduct)
@@ -148,13 +148,14 @@ class ProductListActivity : AppCompatActivity() {
     }
 
     private fun showDilutionSelectionDialog(productWithDilutions: ProductWithDilutions) {
+        val sortedDilutions = productWithDilutions.dilutions.sortedBy { it.minValue }
         AlertDialog.Builder(this)
             .setTitle("Diluizioni per ${productWithDilutions.product.name}")
             .setNegativeButton("Annulla", null)
-            .setItems(productWithDilutions.dilutions.map { getDescription(it) }
+            .setItems(sortedDilutions.map { getDescription(it) }
                 .toTypedArray()) { _, which ->
                 setSelectedProductWithDilution(
-                    productWithDilutions.dilutions[which],
+                    sortedDilutions[which],
                     productWithDilutions
                 )
             }
@@ -162,12 +163,9 @@ class ProductListActivity : AppCompatActivity() {
     }
 
     fun showDialogWithCategorizedItems(productWithDilutions: ProductWithDilutions) {
-        // Definisci le categorie e gli elementi per ciascuna categoria
-        val categories = productWithDilutions.dilutions.mapNotNull { it.mode }.distinct()
-
-        val items = productWithDilutions.dilutions.groupBy { it.mode }
-            .values
-            .toList()
+        val sortedDilutions = productWithDilutions.dilutions.sortedBy { it.minValue }
+        val categories = sortedDilutions.map { it.mode }.distinct()
+        val items = sortedDilutions.groupBy { it.mode }.values.toList()
 
         // Crea una lista di mappe per la struttura dei dati
         val groupData = categories.map { mapOf("CATEGORY" to it) }

@@ -154,7 +154,8 @@ class ProductAddActivity : AppCompatActivity() {
         if (dilutions.isEmpty()) {
             addDilutionRow(dilutionListLayout)
         } else {
-            for (dilution in dilutions) {
+            val sortedDilutions = dilutions.sortedBy { it.minValue }
+            for (dilution in sortedDilutions) {
                 addDilutionRow(dilutionListLayout, dilution)
             }
         }
