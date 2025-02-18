@@ -13,6 +13,7 @@ import android.text.style.ClickableSpan
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
@@ -134,6 +135,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun updateChildViews(view: View, isChecked: Boolean) {
+        view.isClickable = isChecked
+        view.isEnabled = isChecked
+
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                val child = view.getChildAt(i)
+                updateChildViews(child, isChecked) // Chiamata ricorsiva su ogni figlio
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -169,6 +182,10 @@ class MainActivity : AppCompatActivity() {
 
         checkBoxes.forEach { checkBox ->
             checkBox.setOnCheckedChangeListener { _, isChecked ->
+                if (checkBox === findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox)) {
+                    productContainer.alpha = if (isChecked) 1.0f else 0.5f // Imposta l'alpha per dare l'effetto di disabilitazione
+                    updateChildViews(productContainer, isChecked)
+                }
                 if (checkBoxes.count { it.isChecked } >= 2) {
                     checkBoxes.forEach { otherCheckBox ->
                         if (!otherCheckBox.isChecked) {
@@ -188,7 +205,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        productContainer.setOnClickListener { launchProductListActivity() }
+        productContainer.setOnClickListener {
+            launchProductListActivity()
+        }
 
         fun calculateResult(currentEditText: EditText) {
             var totalLiquid = getDoubleValue(totalLiquidEditText)
