@@ -17,6 +17,7 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setSelectedProduct(selectedProductWithDilutions: ProductWithDilutions?, selectedDilution: Dilution?) {
+        val seekBar: SeekBar = findViewById(R.id.seekBar)
         if (selectedProductWithDilutions != null && selectedDilution != null) {
             dilutionRatioEditText.setText(selectedDilution.value.toString())
 
@@ -79,11 +81,37 @@ class MainActivity : AppCompatActivity() {
                 .error(R.drawable.product_loading)
                 .into(selectedProductImageView)
 
+            // Initialize seekbar
+            seekBar.setOnSeekBarChangeListener(null)
+            seekBar.progress = 0
+            if (selectedDilution.minValue != selectedDilution.value) {
+                seekBar.max = selectedDilution.value - selectedDilution.minValue
+                seekBar.visibility = View.VISIBLE
+            } else {
+                seekBar.visibility = View.GONE
+            }
+
+            seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    dilutionRatioEditText.setText(getStringValue((selectedDilution.value - progress).toDouble()))
+                    // TODO calcola altri due campi anche se diluizione è disabled
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+                }
+            })
+
             findViewById<LinearLayout>(R.id.selectedProductContainer).visibility = View.VISIBLE
             findViewById<TextView>(R.id.noSelectedProductLabel).visibility = View.GONE
         } else {
             findViewById<LinearLayout>(R.id.selectedProductContainer).visibility = View.GONE
             findViewById<TextView>(R.id.noSelectedProductLabel).visibility = View.VISIBLE
+            seekBar.visibility = View.GONE
         }
     }
 
