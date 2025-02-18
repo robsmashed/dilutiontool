@@ -168,12 +168,6 @@ class MainActivity : AppCompatActivity() {
 
         checkBoxes.forEach { checkBox ->
             checkBox.setOnCheckedChangeListener { _, isChecked ->
-                if (checkBox === findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox)) {
-                    productContainer.alpha = if (isChecked) 1.0f else 0.5f // Imposta l'alpha per dare l'effetto di disabilitazione
-                    productContainer.isClickable = isChecked
-                    selectedProductLinkTextView.movementMethod = if (isChecked) LinkMovementMethod.getInstance() else null
-                    seekBar.isEnabled = isChecked
-                }
                 if (checkBoxes.count { it.isChecked } >= 2) {
                     checkBoxes.forEach { otherCheckBox ->
                         if (!otherCheckBox.isChecked) {
@@ -182,6 +176,7 @@ class MainActivity : AppCompatActivity() {
                             checkBoxEditTextMap[otherCheckBox]?.isEnabled = isChecked // Imposta isEnabled dell'EditText in base allo stato della CheckBox
                         }
                     }
+                    enableProductSelection(findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox).isChecked)
                 } else {
                     checkBoxes.forEach { otherCheckBox ->
                         checkBoxEditTextMap[otherCheckBox]?.isEnabled = false
@@ -189,6 +184,7 @@ class MainActivity : AppCompatActivity() {
                             otherCheckBox.isEnabled = true // Riabilita le CheckBox non selezionate
                         }
                     }
+                    enableProductSelection(false)
                 }
             }
         }
@@ -311,6 +307,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         calculateResult(totalLiquidEditText) // inizializzazione a partire dai due valori iniziali
+    }
+
+    private fun enableProductSelection(enable: Boolean) {
+        productContainer.alpha = if (enable) 1.0f else 0.5f // Imposta l'alpha per dare l'effetto di disabilitazione
+        productContainer.isClickable = enable
+        selectedProductLinkTextView.movementMethod = if (enable) LinkMovementMethod.getInstance() else null
+        seekBar.isEnabled = enable
     }
 
     private fun flashView(view: View) {
