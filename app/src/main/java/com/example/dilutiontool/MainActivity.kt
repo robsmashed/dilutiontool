@@ -30,12 +30,14 @@ import com.example.dilutiontool.entity.ProductWithDilutions
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
+    private var selectedProductDilution: Dilution? = null
     private lateinit var dilutionRatioEditText: EditText
     private lateinit var productContainer: LinearLayout
     private lateinit var selectedProductNameTextView: TextView
     private lateinit var selectedProductDescriptionTextView: TextView
     private lateinit var selectedProductImageView: ImageView
     private lateinit var selectedProductLinkTextView: TextView
+    private lateinit var seekBar: SeekBar
     var isProgrammaticChange = false // Flag per sapere se il cambiamento è programmatico
 
     private val productSelectionLauncher = registerForActivityResult(
@@ -49,8 +51,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setSelectedProduct(selectedProductWithDilutions: ProductWithDilutions?, selectedDilution: Dilution?) {
-        val seekBar: SeekBar = findViewById(R.id.seekBar)
         if (selectedProductWithDilutions != null && selectedDilution != null) {
+            selectedProductDilution = selectedDilution
             dilutionRatioEditText.setText(selectedDilution.value.toString())
 
             selectedProductNameTextView.text = selectedProductWithDilutions.product.name
@@ -83,7 +85,6 @@ class MainActivity : AppCompatActivity() {
                 .into(selectedProductImageView)
 
             // Initialize seekbar
-            seekBar.setOnSeekBarChangeListener(null)
             seekBar.progress = 0
             if (selectedDilution.minValue != selectedDilution.value) {
                 seekBar.max = selectedDilution.value - selectedDilution.minValue
@@ -94,22 +95,18 @@ class MainActivity : AppCompatActivity() {
 
             seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    dilutionRatioEditText.setText(getStringValue((selectedDilution.value - progress).toDouble()))
-                    // TODO calcola altri due campi anche se diluizione è disabled
+                    if (fromUser) {
+                        dilutionRatioEditText.setText(getStringValue((selectedDilution.value - progress).toDouble()))
+                    }
                 }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
-                }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-
-                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             })
 
             findViewById<LinearLayout>(R.id.selectedProductContainer).visibility = View.VISIBLE
             findViewById<TextView>(R.id.noSelectedProductLabel).visibility = View.GONE
         } else {
+            selectedProductDilution = null
             findViewById<LinearLayout>(R.id.selectedProductContainer).visibility = View.GONE
             findViewById<TextView>(R.id.noSelectedProductLabel).visibility = View.VISIBLE
             seekBar.visibility = View.GONE
@@ -163,6 +160,7 @@ class MainActivity : AppCompatActivity() {
         selectedProductDescriptionTextView = findViewById(R.id.selectedProductDescription)
         selectedProductImageView = findViewById(R.id.selectedProductImage)
         selectedProductLinkTextView = findViewById(R.id.selectedProductLinkTextView)
+        seekBar = findViewById(R.id.seekBar)
 
         // Associa ogni CheckBox al relativo EditText in una mappa
         val checkBoxEditTextMap = mapOf(
@@ -306,6 +304,7 @@ class MainActivity : AppCompatActivity() {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
+                    updateSeekbar(editText)
                     if (!isProgrammaticChange) { // Cambiamento fatto dall'utente
                         calculateResult(editText)
                     }
@@ -324,7 +323,7 @@ class MainActivity : AppCompatActivity() {
         calculateResult(totalLiquidEditText) // inizializzazione a partire dai due valori iniziali
     }
 
-    fun flashView(view: View) {
+    private fun flashView(view: View) {
         val animation = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f, 1f)
         animation.duration = 500 // Durata di ogni ciclo
         animation.repeatCount = 1
@@ -355,10 +354,26 @@ class MainActivity : AppCompatActivity() {
         return value;
     }
 
-    // Cambiamento programmatico
     private fun changeTextProgrammatically(editText: EditText, newText: String) {
         isProgrammaticChange = true
         editText.setText(newText)
         isProgrammaticChange = false
+    }
+
+    private fun updateSeekbar(editText: EditText) {
+        if (editText === dilutionRatioEditText && selectedProductDilution != null) {
+            val currentDilutionValue = getDoubleValue(editText)
+            val progress = selectedProductDilution!!.value - currentDilutionValue.toInt()
+
+            if (currentDilutionValue == Double.POSITIVE_INFINITY || progress < 0) {
+                // TODO mostra errore fuori range minimo
+                seekBar.progress = 0;
+            } else if (progress > seekBar.max) {
+                // TODO mostra errore fuori range massimo
+                seekBar.progress = seekBar.max
+            } else {
+                seekBar.progress = progress
+            }
+        }
     }
 }
