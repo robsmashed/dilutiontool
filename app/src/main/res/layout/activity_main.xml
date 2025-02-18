@@ -202,85 +202,109 @@
                 android:textSize="16sp" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/productContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        <FrameLayout
             android:layout_marginTop="30dp"
-            android:background="@drawable/dashed_border"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/noSelectedProductLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:height="130dp"
-                android:gravity="center"
-                android:text="Seleziona un prodotto"
-                android:textSize="18sp" />
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:visibility="gone"
+                android:id="@+id/discardProductSelectionFab"
+                android:contentDescription="Rimuovi prodotto"
+                app:fabCustomSize="35dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_gravity="top|end"
+                android:src="@drawable/baseline_cancel_24"/>
 
             <LinearLayout
-                android:id="@+id/selectedProductContainer"
+                android:id="@+id/productContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:visibility="gone">
+                android:gravity="center"
+                android:orientation="vertical">
 
-                <ImageView
-                    android:id="@+id/selectedProductImage"
-                    android:layout_width="90dp"
-                    android:layout_height="90dp"
+                <TextView
+                    android:background="@drawable/dashed_border"
+                    android:gravity="center"
                     android:layout_gravity="center"
-                    android:src="@drawable/default_image" />
+                    android:id="@+id/noSelectedProductLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="113dp"
+                    android:text="Seleziona un prodotto"
+                    android:textSize="18sp" />
 
                 <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/selectedProductContainer"
+                    android:background="@drawable/border"
+                    android:padding="16dp"
+                    android:gravity="center"
+                    android:layout_gravity="center"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:paddingLeft="10dp">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/selectedProductName"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="Product Name"
-                        android:textSize="18sp" />
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/selectedProductDescription"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:ellipsize="end"
-                        android:maxLines="2"
-                        android:text="Product Description"
-                        android:textSize="14sp" />
+                        <ImageView
+                            android:id="@+id/selectedProductImage"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/default_image" />
 
-                    <TextView
-                        android:id="@+id/selectedProductLinkTextView"
-                        android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingEnd="20dp"
+                            android:paddingStart="10dp">
+
+                            <TextView
+                                android:id="@+id/selectedProductName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:text="Product Name"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/selectedProductDescription"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:ellipsize="end"
+                                android:maxLines="2"
+                                android:text="Product Description"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/selectedProductLinkTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingTop="4dp"
+                                android:text="Product link"
+                                android:textColor="@color/link_color" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <SeekBar
+                        android:layout_marginTop="16dp"
+                        android:id="@+id/seekBar"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingTop="4dp"
-                        android:text="Product link"
-                        android:textColor="@color/link_color" />
+                        android:background="@drawable/gradient_seekbar"
+                        android:progressDrawable="@drawable/seekbar_progress"
+                        android:thumb="@drawable/seekbar_thumb"/>
                 </LinearLayout>
             </LinearLayout>
-
-            <SeekBar
-                android:id="@+id/seekBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/gradient_seekbar"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:layout_marginBottom="20dp"
-                android:progressDrawable="@drawable/seekbar_progress"
-                android:thumb="@drawable/seekbar_thumb"
-                android:visibility="gone" />
-        </LinearLayout>
+        </FrameLayout>
     </LinearLayout>
 </LinearLayout>

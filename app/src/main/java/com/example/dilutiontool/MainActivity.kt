@@ -13,7 +13,6 @@ import android.text.style.ClickableSpan
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
@@ -27,6 +26,7 @@ import com.bumptech.glide.Glide
 import com.example.dilutiontool.DilutionUtils.getDescription
 import com.example.dilutiontool.entity.Dilution
 import com.example.dilutiontool.entity.ProductWithDilutions
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedProductImageView: ImageView
     private lateinit var selectedProductLinkTextView: TextView
     private lateinit var seekBar: SeekBar
+    private lateinit var discardProductSelectionFab: FloatingActionButton
     var isProgrammaticChange = false // Flag per sapere se il cambiamento è programmatico
 
     private val productSelectionLauncher = registerForActivityResult(
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setSelectedProduct(selectedProductWithDilutions: ProductWithDilutions?, selectedDilution: Dilution?) {
         if (selectedProductWithDilutions != null && selectedDilution != null) {
+            discardProductSelectionFab.visibility = View.VISIBLE
             selectedProductDilution = selectedDilution
             dilutionRatioEditText.setText(selectedDilution.value.toString())
 
@@ -106,11 +108,16 @@ class MainActivity : AppCompatActivity() {
             findViewById<LinearLayout>(R.id.selectedProductContainer).visibility = View.VISIBLE
             findViewById<TextView>(R.id.noSelectedProductLabel).visibility = View.GONE
         } else {
-            selectedProductDilution = null
-            findViewById<LinearLayout>(R.id.selectedProductContainer).visibility = View.GONE
-            findViewById<TextView>(R.id.noSelectedProductLabel).visibility = View.VISIBLE
-            seekBar.visibility = View.GONE
+            discardCurrentProductSelection()
         }
+    }
+
+    private fun discardCurrentProductSelection() {
+        discardProductSelectionFab.visibility = View.GONE
+        selectedProductDilution = null
+        findViewById<LinearLayout>(R.id.selectedProductContainer).visibility = View.GONE
+        findViewById<TextView>(R.id.noSelectedProductLabel).visibility = View.VISIBLE
+        seekBar.visibility = View.GONE
     }
 
     private fun launchProductListActivity() {
@@ -149,7 +156,10 @@ class MainActivity : AppCompatActivity() {
         selectedProductImageView = findViewById(R.id.selectedProductImage)
         selectedProductLinkTextView = findViewById(R.id.selectedProductLinkTextView)
         seekBar = findViewById(R.id.seekBar)
-
+        discardProductSelectionFab = findViewById(R.id.discardProductSelectionFab)
+        discardProductSelectionFab.setOnClickListener {
+            discardCurrentProductSelection()
+        }
         // Associa ogni CheckBox al relativo EditText in una mappa
         val checkBoxEditTextMap = mapOf(
             findViewById<CheckBox>(R.id.totalLiquidLockCheckBox) to findViewById<EditText>(R.id.totalEditText),
@@ -189,7 +199,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        productContainer.setOnClickListener {
+        findViewById<LinearLayout>(R.id.selectedProductContainer).setOnClickListener {
+            launchProductListActivity()
+        }
+        findViewById<TextView>(R.id.noSelectedProductLabel).setOnClickListener {
             launchProductListActivity()
         }
 
