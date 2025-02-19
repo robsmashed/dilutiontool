@@ -92,7 +92,7 @@ class ProductListActivity : AppCompatActivity() {
                         product.name.contains(
                             newText,
                             ignoreCase = true
-                        ) || product.description.contains(newText, ignoreCase = true)
+                        ) || product.description?.contains(newText, ignoreCase = true) ?: false
                     }
                     (productRecyclerView.adapter as ProductAdapter).updateList(filteredProducts)
                 }
@@ -313,6 +313,30 @@ class ProductListActivity : AppCompatActivity() {
                     imageUrl = "https://www.lacuradellauto.it/web/image/product.product/3516/image_1024/mixhp12-mafra-hp12-detergente-multiuso?unique=31c4f0a",
                     link = "https://www.lacuradellauto.it/2709-mafra-hp12-detergente-multiuso.html?srsltid=AfmBOoqJYKrYQZV7dGs_-OLY56PeVPFuozXecE0x3MRmzQwhtPgfcZ3F#attr=2344561"
                 ),
+                Product(
+                    name = "Labocosmetica Preludio Alkaline",
+                    description = "Labocosmetica Preludio Alkaline è un pretrattamento alcalino specifico per il lavaggio auto senza acqua, adatto sia per le tecniche waterless che rinseless.",
+                    imageUrl = "https://www.lacuradellauto.it/web/image/product.product/6123/image_1024/mixlabprel-labocosmetica-preludio-alkaline?unique=429c247",
+                    link = "https://www.lacuradellauto.it/4111-labocosmetica-preludio-alkaline.html#attr=2346094"
+                ),
+                Product(
+                    name = "Labocosmetica Preludio Acidic",
+                    description = "Preludio Acidic di Labocosmetica è un pretrattamento acido sviluppato specificamente per il lavaggio auto senza acqua, sia con la tecnica waterless che rinseless.",
+                    imageUrl = "https://www.lacuradellauto.it/web/image/product.product/6134/image_1024/lab138-labocosmetica-preludio-acidic-1-lt?unique=429c247",
+                    link = "https://www.lacuradellauto.it/4119-labocosmetica-preludio-acidic-1-lt.html#attr=2346099"
+                ),
+                Product(
+                    name = "Labocosmetica Ductile",
+                    description = "Ductile è un detergente concentrato ad alto potere pulente, ideale per auto molto sporche o da ricondizionare. Adatto per interni ed esterni, rimuove macchie ostinate senza decolorare i tessuti, lasciando una finitura fresca e pulita.",
+                    imageUrl = "https://www.lacuradellauto.it/web/image/product.product/3861/image_1024/mixlabduc-labocosmetica-ductile-all-purpose-cleaner?unique=429c247",
+                    link = "https://www.lacuradellauto.it/2849-labocosmetica-ductile-all-purpose-cleaner.html#attr=2345598"
+                ),
+                Product(
+                    name = "Labocosmetica Glico",
+                    description = "Glico è un innovativo detergente a base di acido glicolico, ideale per rimuovere residui inorganici, minerali e macchie da sedili e tappetini. La sua formula brevettata evidenzia le macchie nascoste, rendendo il processo di pulizia più efficace, e ripristina colore e morbidezza alle fibre trattate.",
+                    imageUrl = "https://www.lacuradellauto.it/web/image/product.product/4805/image_1024/mixglico-labocosmetica-glico?unique=429c247",
+                    link = "https://www.lacuradellauto.it/3353-labocosmetica-glico.html#attr=2345649"
+                ),
             )
         )
 
@@ -478,6 +502,79 @@ class ProductListActivity : AppCompatActivity() {
                     productId = productIds[11],
                     value = 1,
                     minValue = 1
+                ),
+
+                Dilution(
+                    productId = productIds[12],
+                    description = "Sporco pesante: per cerchi, insetti e sporco organico ostinato",
+                    value = 5,
+                    minValue = 5
+                ),
+                Dilution(
+                    productId = productIds[12],
+                    description = "Sporco intenso: per traffic film e sporco meno ancorato",
+                    value = 10,
+                    minValue = 10
+                ),
+                Dilution(
+                    productId = productIds[12],
+                    description = "Auto bianche e PPF: per eliminare lo sporco inglobato",
+                    value = 15,
+                    minValue = 15
+                ),
+                Dilution(
+                    productId = productIds[12],
+                    description = "Sporco fresco: per sporco fresco e non ancorato",
+                    value = 20,
+                    minValue = 20
+                ),
+
+                Dilution(
+                    productId = productIds[13],
+                    description = "Sporco molto grave",
+                    value = 5,
+                    minValue = 5
+                ),
+                Dilution(
+                    productId = productIds[13],
+                    description = "Pulizia standard su sporco minerale",
+                    value = 10,
+                    minValue = 10
+                ),
+                Dilution(
+                    productId = productIds[13],
+                    description = "Per mantenimento regolare o sporco leggero",
+                    value = 20,
+                    minValue = 15
+                ),
+
+                Dilution(
+                    productId = productIds[14],
+                    description = "Motori, cerchi in lega ed archi passaruota",
+                    value = 3,
+                    minValue = 3,
+                    mode = "Pulizia esterna"
+                ),
+                Dilution(
+                    productId = productIds[14],
+                    description = "Battute e prelavaggio",
+                    value = 20,
+                    minValue = 30,
+                    mode = "Pulizia esterna"
+                ),
+                Dilution(
+                    productId = productIds[14],
+                    description = "Tessuti e moquette",
+                    value = 10,
+                    minValue = 10,
+                    mode = "Pulizia degli interni"
+                ),
+                Dilution(
+                    productId = productIds[14],
+                    description = "Plastiche",
+                    value = 20,
+                    minValue = 20,
+                    mode = "Pulizia degli interni"
                 ),
             )
         )

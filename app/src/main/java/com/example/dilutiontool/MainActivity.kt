@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
             selectedProductLinkTextView.text = spannableString
             selectedProductLinkTextView.movementMethod = LinkMovementMethod.getInstance()
 
-            if (selectedProductWithDilutions.product.link.isBlank()) {
+            if (selectedProductWithDilutions.product.link === null || selectedProductWithDilutions.product.link.isBlank()) {
                 selectedProductLinkTextView.visibility = View.INVISIBLE
             }
 

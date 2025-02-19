@@ -84,7 +84,7 @@ class ProductAdapter(
                 onLongItemClick(productWithDilution) // Chiamato quando il prodotto viene selezionato
             }
 
-            if (productWithDilution.product.link.isBlank()) {
+            if (productWithDilution.product.link === null || productWithDilution.product.link.isBlank()) {
                 productLinkTextView.visibility = View.INVISIBLE
             }
         }
