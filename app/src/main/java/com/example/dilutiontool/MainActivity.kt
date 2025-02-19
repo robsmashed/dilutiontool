@@ -256,7 +256,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 water = totalLiquid - concentrate
-                dilutionRatio = totalLiquid / concentrate - 1
+                dilutionRatio = if (totalLiquid == 0.0 && concentrate == 0.0) 0.0 else totalLiquid / concentrate - 1
                 changeTextProgrammatically(waterEditText, getStringValue(water))
                 changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
             } else if (dilutionRatioEditText.isEnabled && waterEditText.isEnabled) {
