@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import android.widget.ExpandableListView
 import android.widget.SearchView
 import android.widget.SimpleExpandableListAdapter
@@ -180,11 +181,18 @@ class ProductListActivity : AppCompatActivity() {
 
     private fun showDilutionSelectionDialog(productWithDilutions: ProductWithDilutions) {
         val sortedDilutions = productWithDilutions.dilutions.sortedBy { it.minValue }
-        AlertDialog.Builder(this)
+        val context = this
+
+        val adapter = ArrayAdapter(
+            context,
+            R.layout.dialog_list_item,
+            sortedDilutions.map { getDescription(it) }
+        )
+
+        AlertDialog.Builder(context)
             .setTitle("Diluizioni per ${productWithDilutions.product.name}")
             .setNegativeButton("Annulla", null)
-            .setItems(sortedDilutions.map { getDescription(it) }
-                .toTypedArray()) { _, which ->
+            .setAdapter(adapter) { _, which ->
                 setSelectedProductWithDilution(
                     sortedDilutions[which],
                     productWithDilutions
@@ -192,6 +200,7 @@ class ProductListActivity : AppCompatActivity() {
             }
             .show()
     }
+
 
     fun showDialogWithCategorizedItems(productWithDilutions: ProductWithDilutions) {
         val sortedDilutions = productWithDilutions.dilutions.sortedBy { it.minValue }
@@ -210,7 +219,7 @@ class ProductListActivity : AppCompatActivity() {
             arrayOf("CATEGORY"),
             intArrayOf(android.R.id.text1),
             childData,
-            android.R.layout.simple_list_item_1,
+            R.layout.dialog_list_item,
             arrayOf("ITEM"),
             intArrayOf(android.R.id.text1)
         )
