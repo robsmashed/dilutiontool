@@ -10,7 +10,7 @@ import kotlinx.parcelize.Parcelize
 data class Product(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
-    val description: String,
-    val imageUrl: String,
-    val link: String
+    val description: String?,
+    val imageUrl: String?,
+    val link: String?
 ) : Parcelable
