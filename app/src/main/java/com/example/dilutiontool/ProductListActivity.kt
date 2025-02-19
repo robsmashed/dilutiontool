@@ -307,6 +307,12 @@ class ProductListActivity : AppCompatActivity() {
                     imageUrl = "https://www.lacuradellauto.it/web/image/product.product/4215/image_1024/mixgsss-good-stuff-sour-shampoo?unique=07dd277",
                     link = "https://www.lacuradellauto.it/2971-good-stuff-sour-shampoo"
                 ),
+                Product(
+                    name = "MaFra HP12",
+                    description = "HP 12 è il potente Sgrassatore Universale Multiuso per sporchi difficili, che agisce in profondità ma in sicurezza, rispettando le parti trattate senza intaccarle in modo aggressivo.",
+                    imageUrl = "https://www.lacuradellauto.it/web/image/product.product/3516/image_1024/mixhp12-mafra-hp12-detergente-multiuso?unique=31c4f0a",
+                    link = "https://www.lacuradellauto.it/2709-mafra-hp12-detergente-multiuso.html?srsltid=AfmBOoqJYKrYQZV7dGs_-OLY56PeVPFuozXecE0x3MRmzQwhtPgfcZ3F#attr=2344561"
+                ),
             )
         )
 
@@ -461,6 +467,17 @@ class ProductListActivity : AppCompatActivity() {
                     productId = productIds[10],
                     value = 500,
                     minValue = 160
+                ),
+
+                Dilution(
+                    productId = productIds[11],
+                    value = 0,
+                    minValue = 0
+                ),
+                Dilution(
+                    productId = productIds[11],
+                    value = 1,
+                    minValue = 1
                 ),
             )
         )
