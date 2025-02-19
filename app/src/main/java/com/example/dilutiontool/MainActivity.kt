@@ -27,6 +27,7 @@ import com.example.dilutiontool.DilutionUtils.getDescription
 import com.example.dilutiontool.entity.Dilution
 import com.example.dilutiontool.entity.ProductWithDilutions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import org.w3c.dom.Text
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -39,6 +40,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedProductLinkTextView: TextView
     private lateinit var seekBar: SeekBar
     private lateinit var discardProductSelectionFab: FloatingActionButton
+    private lateinit var selectedProductContainer: LinearLayout
+    private lateinit var noSelectedProductLabel: TextView
     var isProgrammaticChange = false // Flag per sapere se il cambiamento è programmatico
 
     private val productSelectionLauncher = registerForActivityResult(
@@ -105,8 +108,8 @@ class MainActivity : AppCompatActivity() {
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             })
 
-            findViewById<LinearLayout>(R.id.selectedProductContainer).visibility = View.VISIBLE
-            findViewById<TextView>(R.id.noSelectedProductLabel).visibility = View.GONE
+            selectedProductContainer.visibility = View.VISIBLE
+            noSelectedProductLabel.visibility = View.GONE
         } else {
             discardCurrentProductSelection()
         }
@@ -115,8 +118,8 @@ class MainActivity : AppCompatActivity() {
     private fun discardCurrentProductSelection() {
         discardProductSelectionFab.visibility = View.GONE
         selectedProductDilution = null
-        findViewById<LinearLayout>(R.id.selectedProductContainer).visibility = View.GONE
-        findViewById<TextView>(R.id.noSelectedProductLabel).visibility = View.VISIBLE
+        selectedProductContainer.visibility = View.GONE
+        noSelectedProductLabel.visibility = View.VISIBLE
         seekBar.visibility = View.GONE
     }
 
@@ -156,6 +159,8 @@ class MainActivity : AppCompatActivity() {
         selectedProductImageView = findViewById(R.id.selectedProductImage)
         selectedProductLinkTextView = findViewById(R.id.selectedProductLinkTextView)
         seekBar = findViewById(R.id.seekBar)
+        selectedProductContainer = findViewById(R.id.selectedProductContainer)
+        noSelectedProductLabel = findViewById(R.id.noSelectedProductLabel)
         discardProductSelectionFab = findViewById(R.id.discardProductSelectionFab)
         discardProductSelectionFab.setOnClickListener {
             discardCurrentProductSelection()
@@ -199,12 +204,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<LinearLayout>(R.id.selectedProductContainer).setOnClickListener {
+        val launchProductList = View.OnClickListener {
             launchProductListActivity()
         }
-        findViewById<TextView>(R.id.noSelectedProductLabel).setOnClickListener {
-            launchProductListActivity()
-        }
+        selectedProductContainer.setOnClickListener(launchProductList)
+        noSelectedProductLabel.setOnClickListener(launchProductList)
+
 
         fun calculateResult(currentEditText: EditText) {
             var totalLiquid = getDoubleValue(totalLiquidEditText)
@@ -324,7 +329,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun enableProductSelection(enable: Boolean) {
         productContainer.alpha = if (enable) 1.0f else 0.5f // Imposta l'alpha per dare l'effetto di disabilitazione
-        productContainer.isClickable = enable
+        findViewById<LinearLayout>(R.id.selectedProductContainer).isClickable = enable
+        findViewById<TextView>(R.id.noSelectedProductLabel).isClickable = enable
         selectedProductLinkTextView.movementMethod = if (enable) LinkMovementMethod.getInstance() else null
         seekBar.isEnabled = enable
     }
