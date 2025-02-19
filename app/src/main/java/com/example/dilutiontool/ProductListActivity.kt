@@ -558,8 +558,8 @@ class ProductListActivity : AppCompatActivity() {
                 Dilution(
                     productId = productIds[14],
                     description = "Battute e prelavaggio",
-                    value = 20,
-                    minValue = 30,
+                    value = 30,
+                    minValue = 20,
                     mode = "Pulizia esterna"
                 ),
                 Dilution(
@@ -575,6 +575,31 @@ class ProductListActivity : AppCompatActivity() {
                     value = 20,
                     minValue = 20,
                     mode = "Pulizia degli interni"
+                ),
+
+                Dilution(
+                    productId = productIds[15],
+                    description = "Utilizzo “Stand Alone” e mantenimento",
+                    value = 10,
+                    minValue = 10,
+                ),
+                Dilution(
+                    productId = productIds[15],
+                    description = "Utilizzo “Combo” per un ciclo di lavaggio su tappezzeria particolarmente sporca",
+                    value = 5,
+                    minValue = 5,
+                ),
+                Dilution(
+                    productId = productIds[15],
+                    description = "Per la pulizia e ridonare morbidezza ai pennelli e spazzole",
+                    value = 5,
+                    minValue = 5,
+                ),
+                Dilution(
+                    productId = productIds[15],
+                    description = "Come ultimo step di risciacquo per eliminare i tensioattivi alcalini utilizzati precedentemente",
+                    value = 50,
+                    minValue = 50,
                 ),
             )
         )
