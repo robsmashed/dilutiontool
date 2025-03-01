@@ -149,6 +149,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun limitDecimalInput(editText: EditText) {
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(charSequence: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(editable: Editable?) {
+                val text = editable.toString()
+                if (text.contains(".")) {
+                    val parts = text.split(".")
+                    if (parts.size == 2 && parts[1].length > 2) {
+                        val newText = parts[0] + "." + parts[1].substring(0, 2)
+                        editText.setText(newText)
+                        editText.setSelection(newText.length)
+                    }
+                }
+            }
+        })
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -172,6 +190,11 @@ class MainActivity : AppCompatActivity() {
         discardProductSelectionFab.setOnClickListener {
             discardCurrentProductSelection()
         }
+
+        limitDecimalInput(totalLiquidEditText)
+        limitDecimalInput(concentrateEditText)
+        limitDecimalInput(waterEditText)
+
         // Associa ogni CheckBox al relativo EditText in una mappa
         val checkBoxEditTextMap = mapOf(
             findViewById<CheckBox>(R.id.totalLiquidLockCheckBox) to findViewById<EditText>(R.id.totalEditText),
