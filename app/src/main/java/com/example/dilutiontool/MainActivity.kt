@@ -191,6 +191,7 @@ class MainActivity : AppCompatActivity() {
             discardCurrentProductSelection()
         }
 
+        limitDecimalInput(dilutionRatioEditText)
         limitDecimalInput(totalLiquidEditText)
         limitDecimalInput(concentrateEditText)
         limitDecimalInput(waterEditText)
