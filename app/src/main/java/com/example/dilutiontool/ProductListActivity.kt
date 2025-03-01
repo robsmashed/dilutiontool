@@ -346,6 +346,12 @@ class ProductListActivity : AppCompatActivity() {
                     imageUrl = "https://www.lacuradellauto.it/web/image/product.product/4805/image_1024/mixglico-labocosmetica-glico?unique=429c247",
                     link = "https://www.lacuradellauto.it/3353-labocosmetica-glico.html#attr=2345649"
                 ),
+                Product(
+                    name = "Cleantle Tire&Wheel Cleaner Pulitore Cerchi",
+                    description = "Cleantle Tire and Wheel Cleaner è un prodotto dedicato alla pulizia efficace di pneumatici, elementi in gomma, tappetini in gomma e cerchi in alluminio e acciaio.",
+                    imageUrl = "https://www.lacuradellauto.it/web/image/product.product/6506/image_1024/mixcletirwhe-cleantle-tire-wheel-cleaner-pulitore-cerchi?unique=588ca88",
+                    link = "https://www.lacuradellauto.it/4285-cleantle-tire-wheel-cleaner-pulitore-cerchi#attr=2346414"
+                ),
             )
         )
 
@@ -609,6 +615,19 @@ class ProductListActivity : AppCompatActivity() {
                     description = "Come ultimo step di risciacquo per eliminare i tensioattivi alcalini utilizzati precedentemente",
                     value = 50,
                     minValue = 50,
+                ),
+
+                Dilution(
+                    productId = productIds[16],
+                    description = "Per lo sporco leggero",
+                    value = 3,
+                    minValue = 1,
+                ),
+                Dilution(
+                    productId = productIds[16],
+                    description = "Pronto all'uso",
+                    value = 0,
+                    minValue = 0,
                 ),
             )
         )
