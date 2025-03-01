@@ -44,6 +44,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var noSelectedProductLabel: TextView
     var isProgrammaticChange = false // Flag per sapere se il cambiamento è programmatico
 
+    private var selectedProductWithDilutions: ProductWithDilutions? = null
+    private var selectedDilution: Dilution? = null
+
     private val productSelectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -56,10 +59,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun setSelectedProduct(selectedProductWithDilutions: ProductWithDilutions?, selectedDilution: Dilution?) {
         if (selectedProductWithDilutions != null && selectedDilution != null) {
+            this.selectedProductWithDilutions = selectedProductWithDilutions;
+            this.selectedDilution = selectedDilution;
+
+            // Initialize view
             discardProductSelectionFab.visibility = View.VISIBLE
             selectedProductDilution = selectedDilution
             dilutionRatioEditText.setText(selectedDilution.value.toString())
-
             selectedProductNameTextView.text = selectedProductWithDilutions.product.name
             selectedProductDescriptionTextView.text = getDescription(selectedDilution)
 
@@ -97,7 +103,6 @@ class MainActivity : AppCompatActivity() {
             } else {
                 seekBar.visibility = View.GONE
             }
-
             seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                     if (fromUser) {
@@ -125,6 +130,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun launchProductListActivity() {
         val intent = Intent(this, ProductListActivity::class.java)
+        intent.putExtra("selectedDilution", selectedDilution)
+        intent.putExtra("selectedProductWithDilutions", selectedProductWithDilutions)
         productSelectionLauncher.launch(intent)
     }
 

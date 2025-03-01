@@ -33,6 +33,9 @@ class ProductListActivity : AppCompatActivity() {
     private lateinit var filteredProducts: List<ProductWithDilutions>
     private lateinit var productRecyclerView: RecyclerView
 
+    private var selectedProductWithDilutions: ProductWithDilutions? = null
+    private var selectedDilution: Dilution? = null
+
     private val activityResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
@@ -64,6 +67,9 @@ class ProductListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_list)
+
+        selectedDilution = intent.getParcelableExtra("selectedDilution")
+        selectedProductWithDilutions = intent.getParcelableExtra("selectedProductWithDilutions")
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -171,12 +177,32 @@ class ProductListActivity : AppCompatActivity() {
         selectedDilution: Dilution,
         selectedProductWithDilutions: ProductWithDilutions
     ) {
+        setResultIntent(selectedDilution, selectedProductWithDilutions)
+        finish()
+    }
+
+    override fun onBackPressed() {
+        val foundProduct: ProductWithDilutions? = products.find { it.product.id == selectedProductWithDilutions?.product?.id }
+        val foundDilution = foundProduct?.dilutions?.find {it.id == selectedDilution?.id || (it.minValue == selectedDilution?.minValue && it.value == selectedDilution?.value)}
+        setResultIntent(foundDilution, foundProduct)
+        super.onBackPressed()
+    }
+
+    private fun setResultIntent(
+        selectedDilution: Dilution?,
+        selectedProductWithDilutions: ProductWithDilutions?
+    ) {
+        var dilution = selectedDilution;
+        var product = selectedProductWithDilutions
+        if (selectedDilution == null || selectedProductWithDilutions == null) { // can't pass product without dilution and viceversa
+            dilution = null
+            product = null
+        }
         val resultIntent = Intent().apply {
-            putExtra("selectedDilution", selectedDilution)
-            putExtra("selectedProductWithDilutions", selectedProductWithDilutions)
+            putExtra("selectedDilution", dilution)
+            putExtra("selectedProductWithDilutions", product)
         }
         setResult(RESULT_OK, resultIntent)
-        finish()
     }
 
     private fun showDilutionSelectionDialog(productWithDilutions: ProductWithDilutions) {
