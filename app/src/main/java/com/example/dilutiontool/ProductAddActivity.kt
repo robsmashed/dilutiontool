@@ -194,10 +194,7 @@ class ProductAddActivity : AppCompatActivity() {
                             minValue = dilutionMinValue ?: dilutionValue ?: 0,
                             mode = dilutionGroupName.ifEmpty { null },
                         )
-                        if (dilutionId !== null) {
-                            dilution.id = dilutionId.toLong()
-                        }
-                        dilutions.add(dilution)
+                        dilutions.add(if (dilutionId !== null) dilution.copy(id = dilutionId.toLong()) else dilution)
                     }
                 }
             }

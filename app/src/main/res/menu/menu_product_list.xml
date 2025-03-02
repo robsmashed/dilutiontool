@@ -5,4 +5,9 @@
         android:title="Importa XML"
         android:orderInCategory="100"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_export"
+        android:title="Esporta XML"
+        android:orderInCategory="101"
+        app:showAsAction="never" />
 </menu>
