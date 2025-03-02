@@ -91,10 +91,7 @@ class MainActivity : AppCompatActivity() {
             )
             selectedProductLinkTextView.text = spannableString
             selectedProductLinkTextView.movementMethod = LinkMovementMethod.getInstance()
-
-            if (selectedProductWithDilutions.product.link === null || selectedProductWithDilutions.product.link.isBlank()) {
-                selectedProductLinkTextView.visibility = View.INVISIBLE
-            }
+            selectedProductLinkTextView.visibility = if (selectedProductWithDilutions.product.link.isNullOrBlank()) View.INVISIBLE else View.VISIBLE
 
             Glide.with(this)
                 .load(selectedProductWithDilutions.product.imageUrl)
