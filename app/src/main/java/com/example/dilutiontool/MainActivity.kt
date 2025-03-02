@@ -27,12 +27,14 @@ import com.example.dilutiontool.DilutionUtils.getDescription
 import com.example.dilutiontool.entity.Dilution
 import com.example.dilutiontool.entity.ProductWithDilutions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import org.w3c.dom.Text
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private var selectedProductDilution: Dilution? = null
     private lateinit var dilutionRatioEditText: EditText
+    private lateinit var totalLiquidEditText: EditText
+    private lateinit var concentrateEditText: EditText
+    private lateinit var waterEditText: EditText
     private lateinit var productContainer: LinearLayout
     private lateinit var selectedProductNameTextView: TextView
     private lateinit var selectedProductDescriptionTextView: TextView
@@ -53,7 +55,12 @@ class MainActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val selectedDilution = result.data?.getParcelableExtra<Dilution>("selectedDilution")
             val selectedProductWithDilutions = result.data?.getParcelableExtra<ProductWithDilutions>("selectedProductWithDilutions")
-            setSelectedProduct(selectedProductWithDilutions, selectedDilution);
+            setSelectedProduct(selectedProductWithDilutions, selectedDilution)
+
+            dilutionRatioEditText.clearFocus()
+            totalLiquidEditText.clearFocus()
+            concentrateEditText.clearFocus()
+            waterEditText.clearFocus()
         }
     }
 
@@ -167,6 +174,98 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun calculateResult(currentEditText: EditText) {
+        var totalLiquid = getDoubleValue(totalLiquidEditText)
+        var dilutionRatio = getDoubleValue(dilutionRatioEditText)
+        var water = getDoubleValue(waterEditText)
+        var concentrate = getDoubleValue(concentrateEditText)
+
+        if (totalLiquidEditText.isEnabled && dilutionRatioEditText.isEnabled) {
+            concentrate = totalLiquid / (dilutionRatio + 1)
+            water = totalLiquid - concentrate
+            changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
+            changeTextProgrammatically(waterEditText, getStringValue(water))
+        } else if (totalLiquidEditText.isEnabled && waterEditText.isEnabled) {
+            if (totalLiquid - water < 0) {
+                if (currentEditText !== waterEditText) {
+                    water = totalLiquid
+                    changeTextProgrammatically(waterEditText, getStringValue(totalLiquid))
+                } else if (currentEditText !== totalLiquidEditText) {
+                    totalLiquid = water
+                    changeTextProgrammatically(totalLiquidEditText, getStringValue(water))
+                }
+            }
+
+            concentrate = totalLiquid - water
+
+            dilutionRatio = if (concentrate == totalLiquid) {
+                0.0
+            } else if (concentrate == 0.0) {
+                Double.POSITIVE_INFINITY
+            } else {
+                water / concentrate
+            }
+            changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
+            changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
+        } else if (totalLiquidEditText.isEnabled && concentrateEditText.isEnabled) {
+            if (totalLiquid - concentrate < 0) {
+                if (currentEditText !== totalLiquidEditText) {
+                    totalLiquid = concentrate
+                    changeTextProgrammatically(totalLiquidEditText, getStringValue(concentrate))
+                } else if (currentEditText !== concentrateEditText) {
+                    concentrate = totalLiquid
+                    changeTextProgrammatically(concentrateEditText, getStringValue(totalLiquid))
+                }
+            }
+
+            water = totalLiquid - concentrate
+            dilutionRatio = if (totalLiquid == 0.0 && concentrate == 0.0) 0.0 else totalLiquid / concentrate - 1
+            changeTextProgrammatically(waterEditText, getStringValue(water))
+            changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
+        } else if (dilutionRatioEditText.isEnabled && waterEditText.isEnabled) {
+            if (dilutionRatio == 0.0) {
+                if (currentEditText !== waterEditText) {
+                    water = 0.0
+                    changeTextProgrammatically(waterEditText, getStringValue(water))
+                    concentrate = totalLiquid;
+                    changeTextProgrammatically(concentrateEditText, getStringValue(totalLiquid))
+                } else if (currentEditText !== dilutionRatioEditText) {
+                    water = 0.0
+                    changeTextProgrammatically(waterEditText, getStringValue(water))
+                    waterEditText.selectAll()
+                    flashView(dilutionRatioEditText)
+                }
+            } else {
+                totalLiquid = (water / dilutionRatio) + water
+                concentrate = totalLiquid - water
+                changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
+                changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
+            }
+        } else if (dilutionRatioEditText.isEnabled && concentrateEditText.isEnabled) {
+            if (dilutionRatio == Double.POSITIVE_INFINITY && currentEditText !== dilutionRatioEditText) {
+                concentrate = 0.0
+                changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
+                concentrateEditText.selectAll()
+                flashView(dilutionRatioEditText)
+            } else {
+                totalLiquid = concentrate * (dilutionRatio + 1)
+                water = totalLiquid - concentrate
+                changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
+                changeTextProgrammatically(waterEditText, getStringValue(water))
+            }
+        } else if (concentrateEditText.isEnabled && waterEditText.isEnabled) {
+            totalLiquid = concentrate + water
+            dilutionRatio = water / concentrate
+
+            if (dilutionRatio.isNaN()) {
+                dilutionRatio = 0.0
+            }
+
+            changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
+            changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -175,9 +274,9 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         dilutionRatioEditText = findViewById(R.id.dilutionRatioEditText)
-        val totalLiquidEditText = findViewById<EditText>(R.id.totalEditText)
-        val concentrateEditText = findViewById<EditText>(R.id.concentrateEditText)
-        val waterEditText = findViewById<EditText>(R.id.waterEditText)
+        totalLiquidEditText = findViewById(R.id.totalEditText)
+        concentrateEditText = findViewById(R.id.concentrateEditText)
+        waterEditText = findViewById(R.id.waterEditText)
         productContainer = findViewById(R.id.productContainer)
         selectedProductNameTextView = findViewById(R.id.selectedProductName)
         selectedProductDescriptionTextView = findViewById(R.id.selectedProductDescription)
@@ -187,6 +286,11 @@ class MainActivity : AppCompatActivity() {
         selectedProductContainer = findViewById(R.id.selectedProductContainer)
         noSelectedProductLabel = findViewById(R.id.noSelectedProductLabel)
         discardProductSelectionFab = findViewById(R.id.discardProductSelectionFab)
+        val totalLiquidLockCheckBox = findViewById<CheckBox>(R.id.totalLiquidLockCheckBox)
+        val dilutionRatioLockCheckBox = findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox)
+        val waterResultTextLockCheckBox = findViewById<CheckBox>(R.id.waterResultTextLockCheckBox)
+        val resultTextLockCheckBox = findViewById<CheckBox>(R.id.resultTextLockCheckBox)
+
         discardProductSelectionFab.setOnClickListener {
             discardCurrentProductSelection()
         }
@@ -196,26 +300,16 @@ class MainActivity : AppCompatActivity() {
         limitDecimalInput(concentrateEditText)
         limitDecimalInput(waterEditText)
 
-        // Associa ogni CheckBox al relativo EditText in una mappa
         val checkBoxEditTextMap = mapOf(
-            findViewById<CheckBox>(R.id.totalLiquidLockCheckBox) to findViewById<EditText>(R.id.totalEditText),
-            findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox) to findViewById<EditText>(R.id.dilutionRatioEditText),
-            findViewById<CheckBox>(R.id.waterResultTextLockCheckBox) to findViewById<EditText>(R.id.waterEditText),
-            findViewById<CheckBox>(R.id.resultTextLockCheckBox) to findViewById<EditText>(R.id.concentrateEditText)
+            totalLiquidLockCheckBox to totalLiquidEditText,
+            dilutionRatioLockCheckBox to dilutionRatioEditText,
+            waterResultTextLockCheckBox to waterEditText,
+            resultTextLockCheckBox to concentrateEditText
         )
-        val checkBoxes = listOf(
-            findViewById<CheckBox>(R.id.totalLiquidLockCheckBox),
-            findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox),
-            findViewById<CheckBox>(R.id.waterResultTextLockCheckBox),
-            findViewById<CheckBox>(R.id.resultTextLockCheckBox)
-        )
-
-        val editTexts = listOf(dilutionRatioEditText, totalLiquidEditText, waterEditText, concentrateEditText)
-
-        checkBoxes.forEach { checkBox ->
+        checkBoxEditTextMap.keys.forEach { checkBox ->
             checkBox.setOnCheckedChangeListener { _, isChecked ->
-                if (checkBoxes.count { it.isChecked } >= 2) {
-                    checkBoxes.forEach { otherCheckBox ->
+                if (checkBoxEditTextMap.keys.count { it.isChecked } >= 2) {
+                    checkBoxEditTextMap.keys.forEach { otherCheckBox ->
                         if (!otherCheckBox.isChecked) {
                             otherCheckBox.isEnabled = false // Disabilita le altre CheckBox non selezionate
                         } else {
@@ -224,7 +318,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     enableProductSelection(findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox).isChecked)
                 } else {
-                    checkBoxes.forEach { otherCheckBox ->
+                    checkBoxEditTextMap.keys.forEach { otherCheckBox ->
                         checkBoxEditTextMap[otherCheckBox]?.isEnabled = false
                         if (!otherCheckBox.isChecked) {
                             otherCheckBox.isEnabled = true // Riabilita le CheckBox non selezionate
@@ -241,118 +335,30 @@ class MainActivity : AppCompatActivity() {
         selectedProductContainer.setOnClickListener(launchProductList)
         noSelectedProductLabel.setOnClickListener(launchProductList)
 
-
-        fun calculateResult(currentEditText: EditText) {
-            var totalLiquid = getDoubleValue(totalLiquidEditText)
-            var dilutionRatio = getDoubleValue(dilutionRatioEditText)
-            var water = getDoubleValue(waterEditText)
-            var concentrate = getDoubleValue(concentrateEditText)
-
-            if (totalLiquidEditText.isEnabled && dilutionRatioEditText.isEnabled) {
-                concentrate = totalLiquid / (dilutionRatio + 1)
-                water = totalLiquid - concentrate
-                changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
-                changeTextProgrammatically(waterEditText, getStringValue(water))
-            } else if (totalLiquidEditText.isEnabled && waterEditText.isEnabled) {
-                if (totalLiquid - water < 0) {
-                    if (currentEditText !== waterEditText) {
-                        water = totalLiquid
-                        changeTextProgrammatically(waterEditText, getStringValue(totalLiquid))
-                    } else if (currentEditText !== totalLiquidEditText) {
-                        totalLiquid = water
-                        changeTextProgrammatically(totalLiquidEditText, getStringValue(water))
-                    }
-                }
-
-                concentrate = totalLiquid - water
-
-                dilutionRatio = if (concentrate == totalLiquid) {
-                    0.0
-                } else if (concentrate == 0.0) {
-                    Double.POSITIVE_INFINITY
-                } else {
-                    water / concentrate
-                }
-                changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
-                changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
-            } else if (totalLiquidEditText.isEnabled && concentrateEditText.isEnabled) {
-                if (totalLiquid - concentrate < 0) {
-                    if (currentEditText !== totalLiquidEditText) {
-                        totalLiquid = concentrate
-                        changeTextProgrammatically(totalLiquidEditText, getStringValue(concentrate))
-                    } else if (currentEditText !== concentrateEditText) {
-                        concentrate = totalLiquid
-                        changeTextProgrammatically(concentrateEditText, getStringValue(totalLiquid))
-                    }
-                }
-
-                water = totalLiquid - concentrate
-                dilutionRatio = if (totalLiquid == 0.0 && concentrate == 0.0) 0.0 else totalLiquid / concentrate - 1
-                changeTextProgrammatically(waterEditText, getStringValue(water))
-                changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
-            } else if (dilutionRatioEditText.isEnabled && waterEditText.isEnabled) {
-                if (dilutionRatio == 0.0) {
-                    if (currentEditText !== waterEditText) {
-                        water = 0.0
-                        changeTextProgrammatically(waterEditText, getStringValue(water))
-                        concentrate = totalLiquid;
-                        changeTextProgrammatically(concentrateEditText, getStringValue(totalLiquid))
-                    } else if (currentEditText !== dilutionRatioEditText) {
-                        water = 0.0
-                        changeTextProgrammatically(waterEditText, getStringValue(water))
-                        waterEditText.selectAll()
-                        flashView(dilutionRatioEditText)
-                    }
-                } else {
-                    totalLiquid = (water / dilutionRatio) + water
-                    concentrate = totalLiquid - water
-                    changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
-                    changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
-                }
-            } else if (dilutionRatioEditText.isEnabled && concentrateEditText.isEnabled) {
-                if (dilutionRatio == Double.POSITIVE_INFINITY && currentEditText !== dilutionRatioEditText) {
-                    concentrate = 0.0
-                    changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
-                    concentrateEditText.selectAll()
-                    flashView(dilutionRatioEditText)
-                } else {
-                    totalLiquid = concentrate * (dilutionRatio + 1)
-                    water = totalLiquid - concentrate
-                    changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
-                    changeTextProgrammatically(waterEditText, getStringValue(water))
-                }
-            } else if (concentrateEditText.isEnabled && waterEditText.isEnabled) {
-                totalLiquid = concentrate + water
-                dilutionRatio = water / concentrate
-
-                if (dilutionRatio.isNaN()) {
-                    dilutionRatio = 0.0
-                }
-
-                changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
-                changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
-            }
-        }
-
-        editTexts.forEach { editText ->
-            editText.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-                override fun afterTextChanged(s: Editable?) {
-                    updateSeekbar(editText)
-                    if (!isProgrammaticChange) { // Cambiamento fatto dall'utente
-                        calculateResult(editText)
-                    }
-                }
-            })
-            editText.setSelectAllOnFocus(true);
-            editText.setOnClickListener {
-                editText.clearFocus()
-                editText.requestFocus()
-            }
-        }
+        setTextInputBehaviour(dilutionRatioEditText)
+        setTextInputBehaviour(waterEditText)
+        setTextInputBehaviour(concentrateEditText)
+        setTextInputBehaviour(totalLiquidEditText)
 
         calculateResult(totalLiquidEditText) // inizializzazione a partire dai due valori iniziali
+    }
+
+    private fun setTextInputBehaviour(editText: EditText) {
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                updateSeekbar(editText)
+                if (!isProgrammaticChange) { // Cambiamento fatto dall'utente
+                    calculateResult(editText)
+                }
+            }
+        })
+        editText.setSelectAllOnFocus(true);
+        editText.setOnClickListener {
+            editText.clearFocus()
+            editText.requestFocus()
+        }
     }
 
     private fun enableProductSelection(enable: Boolean) {
