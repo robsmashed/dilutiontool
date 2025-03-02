@@ -345,13 +345,10 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             })
-            editText.setOnFocusChangeListener { _, hasFocus ->
-                // Se l'EditText ha il focus, seleziona tutto il testo al suo interno
-                if (hasFocus) {
-                    editText.post {
-                        editText.selectAll()
-                    }
-                }
+            editText.setSelectAllOnFocus(true);
+            editText.setOnClickListener {
+                editText.clearFocus()
+                editText.requestFocus()
             }
         }
 
