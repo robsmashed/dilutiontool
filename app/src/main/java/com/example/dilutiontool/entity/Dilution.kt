@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 @Entity(tableName = "dilution_table")
 @Parcelize
 data class Dilution(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey(autoGenerate = true) var id: Long = 0,
     val productId: Long, // Foreign key reference to Product
     val description: String? = "",
     val value: Int,

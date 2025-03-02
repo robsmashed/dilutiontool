@@ -75,19 +75,24 @@ class ProductAddActivity : AppCompatActivity() {
 
                 for (j in 0 until dilutionListLayout.childCount) {
                     val dilutionRow = dilutionListLayout.getChildAt(j)
+                    val dilutionId = dilutionRow.tag as String?
+
                     var dilutionValue = dilutionRow.findViewById<EditText>(R.id.dilutionInput).text.toString().toIntOrNull()
-                    var minDilutionValue = dilutionRow.findViewById<EditText>(R.id.minDilutionInput).text.toString().toIntOrNull()
-                    if (dilutionValue != null || minDilutionValue != null) {
-                        if (dilutionValue != null && minDilutionValue != null && minDilutionValue > dilutionValue) {
-                            dilutionValue = minDilutionValue.also { minDilutionValue = dilutionValue }
+                    var dilutionMinValue = dilutionRow.findViewById<EditText>(R.id.minDilutionInput).text.toString().toIntOrNull()
+                    if (dilutionValue != null || dilutionMinValue != null) {
+                        if (dilutionValue != null && dilutionMinValue != null && dilutionMinValue > dilutionValue) {
+                            dilutionValue = dilutionMinValue.also { dilutionMinValue = dilutionValue }
                         }
                         val dilution = Dilution(
                             productId = 0, // Lo inseriamo poi in fase di saveProductWithDilutions
                             description = dilutionRow.findViewById<EditText>(R.id.dilutionDescriptionInput).text.toString(),
-                            value = dilutionValue ?: minDilutionValue ?: 0,
-                            minValue = minDilutionValue ?: dilutionValue ?: 0,
+                            value = dilutionValue ?: dilutionMinValue ?: 0,
+                            minValue = dilutionMinValue ?: dilutionValue ?: 0,
                             mode = dilutionGroupName.ifEmpty { null },
                         )
+                        if (dilutionId !== null) {
+                            dilution.id = dilutionId.toLong()
+                        }
                         dilutions.add(dilution)
                     }
                 }
@@ -110,7 +115,7 @@ class ProductAddActivity : AppCompatActivity() {
     }
 
     private fun saveProductWithDilutions(productWithDilutions: ProductWithDilutions) {
-        if (productWithDilutions.product.name != "" && productWithDilutions.dilutions.isNotEmpty()) {
+        if (productWithDilutions.product.name.isNotEmpty() && productWithDilutions.dilutions.isNotEmpty()) {
             val db: AppDatabase = getDatabase(this)
 
             val executor = Executors.newSingleThreadExecutor()
@@ -131,8 +136,6 @@ class ProductAddActivity : AppCompatActivity() {
                     finish()
                 }
             }
-        } else {
-            Toast.makeText(this, "Inserisci un nome e una diluizione valida, es. 5:1", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -170,6 +173,7 @@ class ProductAddActivity : AppCompatActivity() {
         }
 
         if (dilution != null) {
+            newDilutionRow.tag = dilution.id.toString()
             newDilutionRow.findViewById<EditText>(R.id.minDilutionInput).setText(dilution.minValue.toString())
             newDilutionRow.findViewById<EditText>(R.id.dilutionInput).setText(dilution.value.toString())
             newDilutionRow.findViewById<EditText>(R.id.dilutionDescriptionInput).setText(dilution.description)

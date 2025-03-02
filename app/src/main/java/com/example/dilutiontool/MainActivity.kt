@@ -28,8 +28,10 @@ import com.example.dilutiontool.entity.Dilution
 import com.example.dilutiontool.entity.ProductWithDilutions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.Locale
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
+    private var selectedProductWithDilutions: ProductWithDilutions? = null
     private var selectedProductDilution: Dilution? = null
     private lateinit var dilutionRatioEditText: EditText
     private lateinit var totalLiquidEditText: EditText
@@ -45,9 +47,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedProductContainer: LinearLayout
     private lateinit var noSelectedProductLabel: TextView
     var isProgrammaticChange = false // Flag per sapere se il cambiamento è programmatico
-
-    private var selectedProductWithDilutions: ProductWithDilutions? = null
-    private var selectedDilution: Dilution? = null
 
     private val productSelectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -66,13 +65,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun setSelectedProduct(selectedProductWithDilutions: ProductWithDilutions?, selectedDilution: Dilution?) {
         if (selectedProductWithDilutions != null && selectedDilution != null) {
-            this.selectedProductWithDilutions = selectedProductWithDilutions;
-            this.selectedDilution = selectedDilution;
+            var currentDilutionValue = getDoubleValue(dilutionRatioEditText) // current dilution value in input text
+            if ( // check if same product & current dilution is in dilution range
+                selectedProductWithDilutions.product.id != this.selectedProductWithDilutions?.product?.id ||
+                (currentDilutionValue < selectedDilution.minValue || currentDilutionValue > selectedDilution.value)
+            ) {
+                currentDilutionValue = selectedDilution.value.toDouble() // reset to the lightest dilution of the product
+            }
 
             // Initialize view
             discardProductSelectionFab.visibility = View.VISIBLE
             selectedProductDilution = selectedDilution
-            dilutionRatioEditText.setText(selectedDilution.value.toString())
+            this.selectedProductWithDilutions = selectedProductWithDilutions
+            dilutionRatioEditText.setText(getStringValue(currentDilutionValue))
             selectedProductNameTextView.text = selectedProductWithDilutions.product.name
             selectedProductDescriptionTextView.text = getDescription(selectedDilution)
 
@@ -107,6 +112,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 seekBar.visibility = View.GONE
             }
+            seekBar.progress = selectedDilution.value - currentDilutionValue.roundToInt()
             seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                     if (fromUser) {
@@ -134,7 +140,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun launchProductListActivity() {
         val intent = Intent(this, ProductListActivity::class.java)
-        intent.putExtra("selectedDilution", selectedDilution)
+        intent.putExtra("selectedDilution", selectedProductDilution)
         intent.putExtra("selectedProductWithDilutions", selectedProductWithDilutions)
         productSelectionLauncher.launch(intent)
     }
