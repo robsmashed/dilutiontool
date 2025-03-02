@@ -81,7 +81,31 @@ class ProductListActivity : AppCompatActivity() {
         val searchView = findViewById<SearchView>(R.id.searchView)
         searchView.setIconifiedByDefault(false) // Espandi la SearchView di default
 
-        // TODO restore searchview logic
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                // Chiudi la tastiera
+                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val currentFocusView = currentFocus
+                if (currentFocusView != null) {
+                    inputMethodManager.hideSoftInputFromWindow(currentFocusView.windowToken, 0)
+                }
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText != null) {
+                    filteredProducts = products.filter { productWithDilutions ->
+                        val product = productWithDilutions.product
+                        product.name.contains(
+                            newText,
+                            ignoreCase = true
+                        ) || product.description?.contains(newText, ignoreCase = true) ?: false
+                    }
+                    (productRecyclerView.adapter as ProductAdapter).updateList(filteredProducts)
+                }
+                return true
+            }
+        })
 
         val fabAddProduct: FloatingActionButton = findViewById(R.id.fab)
 
