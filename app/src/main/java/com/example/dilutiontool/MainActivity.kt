@@ -105,23 +105,23 @@ class MainActivity : AppCompatActivity() {
                 .into(selectedProductImageView)
 
             // Initialize seekbar
-            seekBar.progress = 0
             if (selectedDilution.minValue != selectedDilution.value) {
+                seekBar.progress = 0
                 seekBar.max = selectedDilution.value - selectedDilution.minValue
                 seekBar.visibility = View.VISIBLE
+                seekBar.progress = selectedDilution.value - currentDilutionValue.roundToInt()
+                seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                        if (fromUser) {
+                            dilutionRatioEditText.setText(getStringValue((selectedDilution.value - progress).toDouble()))
+                        }
+                    }
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+                })
             } else {
                 seekBar.visibility = View.GONE
             }
-            seekBar.progress = selectedDilution.value - currentDilutionValue.roundToInt()
-            seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    if (fromUser) {
-                        dilutionRatioEditText.setText(getStringValue((selectedDilution.value - progress).toDouble()))
-                    }
-                }
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
 
             selectedProductContainer.visibility = View.VISIBLE
             noSelectedProductLabel.visibility = View.GONE
