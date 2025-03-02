@@ -1,12 +1,14 @@
 package com.example.dilutiontool
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -29,11 +31,11 @@ class ProductAddActivity : AppCompatActivity() {
     val PICK_IMAGE_REQUEST = 1
     private lateinit var productNameInput: EditText
     private lateinit var productDescriptionInput: EditText
-    private lateinit var productImageUrlInput: EditText
     private lateinit var productLinkInput: EditText
     private lateinit var dilutionGroups: LinearLayout
     private lateinit var addDilutionGroupButton: Button
     private lateinit var saveProductButton: Button
+    private lateinit var productImageView: ImageView
     private var imageBytes: ByteArray? = null
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -58,7 +60,7 @@ class ProductAddActivity : AppCompatActivity() {
             .load(image)
             .placeholder(R.drawable.product_loading)
             .error(R.drawable.product_loading)
-            .into(findViewById(R.id.productImageView))
+            .into(productImageView)
     }
 
     private suspend fun getImageFromUrl(imageUrl: String): ByteArray? {
@@ -89,21 +91,53 @@ class ProductAddActivity : AppCompatActivity() {
 
         productNameInput = findViewById(R.id.productNameInput)
         productDescriptionInput = findViewById(R.id.productDescriptionInput)
-        productImageUrlInput = findViewById(R.id.productImageUrlInput)
         productLinkInput = findViewById(R.id.productLinkInput)
         dilutionGroups = findViewById(R.id.dilutionGroups)
         addDilutionGroupButton = findViewById(R.id.addDilutionGroupButton)
         saveProductButton = findViewById(R.id.saveProductButton)
+        productImageView = findViewById(R.id.productImageView)
 
-        findViewById<Button>(R.id.productImageUrlButton).setOnClickListener {
-            CoroutineScope(Dispatchers.Main).launch {
-                setImage(getImageFromUrl(productImageUrlInput.text.toString()))
+        productImageView.setOnClickListener {
+            val builder = AlertDialog.Builder(this)
+            builder.setItems(arrayOf(
+                "Scegli dalla Galleria",
+                "Carica da URL"
+            )) { _, which ->
+                when (which) {
+                    0 -> {
+                        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                        intent.type = "image/*"
+                        startActivityForResult(intent, PICK_IMAGE_REQUEST)
+                    }
+                    1 -> {
+                        val editText = EditText(this)
+                        editText.hint = "Inserisci URL immagine"
+                        val dialog = AlertDialog.Builder(this)
+                            .setTitle("Inserisci URL")
+                            .setView(editText)
+                            .setPositiveButton("Carica", null)
+                            .create()
+                        dialog.setOnShowListener {
+                            val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                            button.setOnClickListener {
+                                val imageUrl = editText.text.toString().trim()
+                                if (imageUrl.isNotEmpty()) {
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        setImage(getImageFromUrl(imageUrl))
+                                    }
+                                    dialog.dismiss() // Chiudi solo se il campo non è vuoto
+                                } else {
+                                    editText.error = "Inserisci un URL valido"
+                                }
+                            }
+                        }
+
+                        dialog.show()
+
+                    }
+                }
             }
-        }
-        findViewById<Button>(R.id.productImageFileButton).setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            intent.type = "image/*"
-            startActivityForResult(intent, PICK_IMAGE_REQUEST)
+            builder.show()
         }
 
         val productWithDilutions = intent.getParcelableExtra<ProductWithDilutions>("PRODUCT_WITH_DILUTIONS")

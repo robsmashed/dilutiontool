@@ -8,6 +8,13 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <ImageView
+            android:id="@+id/productImageView"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:layout_gravity="center"
+            android:src="@drawable/default_image" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -33,37 +40,6 @@
             android:id="@+id/productDescriptionInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-        <ImageView
-            android:id="@+id/productImageView"
-            android:layout_width="90dp"
-            android:layout_height="90dp"
-            android:layout_gravity="center"
-            android:src="@drawable/default_image" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="4dp"
-            android:text="Immagine da URL"
-            android:textColor="#000000"
-            android:textSize="14sp" />
-        <EditText
-            android:id="@+id/productImageUrlInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/productImageUrlButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Scegli immagine da url">
-        </Button>
-
-        <Button
-            android:id="@+id/productImageFileButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Scegli immagine da file">
-        </Button>
 
         <TextView
             android:layout_width="match_parent"
