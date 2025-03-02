@@ -23,7 +23,6 @@ import com.example.dilutiontool.DilutionUtils.getDescription
 import com.example.dilutiontool.data.database.AppDatabase
 import com.example.dilutiontool.data.database.AppDatabase.Companion.getDatabase
 import com.example.dilutiontool.entity.Dilution
-import com.example.dilutiontool.entity.Product
 import com.example.dilutiontool.entity.ProductWithDilutions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
@@ -38,6 +37,7 @@ class ProductListActivity : AppCompatActivity() {
     private lateinit var products: List<ProductWithDilutions>
     private lateinit var filteredProducts: List<ProductWithDilutions>
     private lateinit var productRecyclerView: RecyclerView
+    private lateinit var searchView: SearchView
 
     private var selectedProductWithDilutions: ProductWithDilutions? = null
     private var selectedDilution: Dilution? = null
@@ -152,7 +152,7 @@ class ProductListActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.baseline_arrow_back_ios_24)
 
-        val searchView = findViewById<SearchView>(R.id.searchView)
+        searchView = findViewById(R.id.searchView)
         searchView.setIconifiedByDefault(false) // Espandi la SearchView di default
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -205,7 +205,6 @@ class ProductListActivity : AppCompatActivity() {
         executor.execute {
             products = db.productDao().getAllProductsWithDilutionsSortedByNameAsc()
             filteredProducts = products
-
             runOnUiThread {
                 productRecyclerView = findViewById(R.id.productRecyclerView)
                 productRecyclerView.layoutManager = LinearLayoutManager(this@ProductListActivity)
