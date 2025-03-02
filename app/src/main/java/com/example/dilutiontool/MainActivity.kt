@@ -309,20 +309,18 @@ class MainActivity : AppCompatActivity() {
         checkBoxEditTextMap.keys.forEach { checkBox ->
             checkBox.setOnCheckedChangeListener { _, isChecked ->
                 if (checkBoxEditTextMap.keys.count { it.isChecked } >= 2) {
-                    checkBoxEditTextMap.keys.forEach { otherCheckBox ->
-                        if (!otherCheckBox.isChecked) {
-                            otherCheckBox.isEnabled = false // Disabilita le altre CheckBox non selezionate
+                    for ((otherCheckBox, otherEditText) in checkBoxEditTextMap) {
+                        if (otherCheckBox.isChecked) {
+                            otherEditText.isEnabled = isChecked // Imposta isEnabled dell'EditText in base allo stato della checkBox
                         } else {
-                            checkBoxEditTextMap[otherCheckBox]?.isEnabled = isChecked // Imposta isEnabled dell'EditText in base allo stato della CheckBox
+                            otherCheckBox.isEnabled = false // Disabilita le altre CheckBox non selezionate
                         }
                     }
                     enableProductSelection(findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox).isChecked)
                 } else {
-                    checkBoxEditTextMap.keys.forEach { otherCheckBox ->
-                        checkBoxEditTextMap[otherCheckBox]?.isEnabled = false
-                        if (!otherCheckBox.isChecked) {
-                            otherCheckBox.isEnabled = true // Riabilita le CheckBox non selezionate
-                        }
+                    for ((otherCheckBox, otherEditText) in checkBoxEditTextMap) {
+                        otherEditText.isEnabled = false // Disabilita tutti i campi di testo
+                        otherCheckBox.isEnabled = true // Riabilita tutte le checkbox
                     }
                     enableProductSelection(false)
                 }
