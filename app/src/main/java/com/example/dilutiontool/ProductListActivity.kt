@@ -183,8 +183,10 @@ class ProductListActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         val foundProduct: ProductWithDilutions? = products.find { it.product.id == selectedProductWithDilutions?.product?.id }
-        val foundDilution = foundProduct?.dilutions?.find {it.id == selectedDilution?.id || (it.minValue == selectedDilution?.minValue && it.value == selectedDilution?.value)}
-        setResultIntent(foundDilution, foundProduct)
+        val foundDilution = foundProduct?.dilutions?.find { it.minValue == selectedDilution?.minValue && it.value == selectedDilution?.value }
+        if (foundProduct == null || foundDilution == null) { // update only if there is any relevant change
+            setResultIntent(foundDilution, foundProduct)
+        }
         super.onBackPressed()
     }
 
