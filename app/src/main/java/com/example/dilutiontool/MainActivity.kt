@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
             selectedProductLinkTextView.visibility = if (selectedProductWithDilutions.product.link.isNullOrBlank()) View.INVISIBLE else View.VISIBLE
 
             Glide.with(this)
-                .load(selectedProductWithDilutions.product.imageUrl)
+                .load(selectedProductWithDilutions.product.image)
                 .placeholder(R.drawable.product_loading)
                 .error(R.drawable.product_loading)
                 .into(selectedProductImageView)

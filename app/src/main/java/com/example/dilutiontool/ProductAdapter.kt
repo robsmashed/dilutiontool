@@ -69,7 +69,7 @@ class ProductAdapter(
 
             // Usa Glide per caricare l'immagine
             Glide.with(itemView.context)
-                .load(productWithDilution.product.imageUrl)
+                .load(productWithDilution.product.image)
                 .placeholder(R.drawable.product_loading)
                 .error(R.drawable.product_loading)
                 .into(productImageView)

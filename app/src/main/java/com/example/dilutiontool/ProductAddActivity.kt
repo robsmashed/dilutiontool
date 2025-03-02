@@ -1,21 +1,32 @@
 package com.example.dilutiontool
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.example.dilutiontool.data.database.AppDatabase
 import com.example.dilutiontool.data.database.AppDatabase.Companion.getDatabase
 import com.example.dilutiontool.entity.Dilution
 import com.example.dilutiontool.entity.Product
 import com.example.dilutiontool.entity.ProductWithDilutions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.net.URL
 import java.util.concurrent.Executors
 
 class ProductAddActivity : AppCompatActivity() {
+    val PICK_IMAGE_REQUEST = 1
     private lateinit var productNameInput: EditText
     private lateinit var productDescriptionInput: EditText
     private lateinit var productImageUrlInput: EditText
@@ -23,6 +34,54 @@ class ProductAddActivity : AppCompatActivity() {
     private lateinit var dilutionGroups: LinearLayout
     private lateinit var addDilutionGroupButton: Button
     private lateinit var saveProductButton: Button
+    private var imageBytes: ByteArray? = null
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
+            data?.data?.let { uri ->
+                try {
+                    setImage(contentResolver.openInputStream(uri)?.use { inputStream ->
+                        inputStream.readBytes()
+                    })
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    private fun setImage(image: ByteArray?) {
+        imageBytes = image
+        Glide.with(this)
+            .load(image)
+            .placeholder(R.drawable.product_loading)
+            .error(R.drawable.product_loading)
+            .into(findViewById(R.id.productImageView))
+    }
+
+    private suspend fun getImageFromUrl(imageUrl: String): ByteArray? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val url = URL(imageUrl)
+                val output = ByteArrayOutputStream()
+
+                url.openStream().use { stream ->
+                    val buffer = ByteArray(4096)
+                    var bytesRead: Int
+
+                    while (stream.read(buffer).also { bytesRead = it } != -1) {
+                        output.write(buffer, 0, bytesRead)
+                    }
+                }
+                output.toByteArray()
+            } catch (e: IOException) {
+                e.printStackTrace()
+                null
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,13 +95,24 @@ class ProductAddActivity : AppCompatActivity() {
         addDilutionGroupButton = findViewById(R.id.addDilutionGroupButton)
         saveProductButton = findViewById(R.id.saveProductButton)
 
+        findViewById<Button>(R.id.productImageUrlButton).setOnClickListener {
+            CoroutineScope(Dispatchers.Main).launch {
+                setImage(getImageFromUrl(productImageUrlInput.text.toString()))
+            }
+        }
+        findViewById<Button>(R.id.productImageFileButton).setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            intent.type = "image/*"
+            startActivityForResult(intent, PICK_IMAGE_REQUEST)
+        }
+
         val productWithDilutions = intent.getParcelableExtra<ProductWithDilutions>("PRODUCT_WITH_DILUTIONS")
         if (productWithDilutions != null) {
             productWithDilutions.let {
                 productNameInput.setText(it.product.name)
                 productDescriptionInput.setText(it.product.description)
-                productImageUrlInput.setText(it.product.imageUrl)
                 productLinkInput.setText(it.product.link)
+                setImage(it.product.image)
             }
 
             val groupedByMode: Map<String, List<Dilution>> = productWithDilutions.dilutions.groupBy { it.mode ?: "" }
@@ -62,7 +132,7 @@ class ProductAddActivity : AppCompatActivity() {
                 id = productWithDilutions?.product?.id ?: 0,
                 name = productNameInput.text.toString(),
                 description = productDescriptionInput.text.toString(),
-                imageUrl = productImageUrlInput.text.toString(),
+                image = imageBytes,
                 link = productLinkInput.text.toString()
             )
 
@@ -111,7 +181,6 @@ class ProductAddActivity : AppCompatActivity() {
                 ))
             }
         }
-
     }
 
     private fun saveProductWithDilutions(productWithDilutions: ProductWithDilutions) {
