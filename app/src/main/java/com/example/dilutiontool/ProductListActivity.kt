@@ -209,13 +209,17 @@ class ProductListActivity : AppCompatActivity() {
                 productRecyclerView = findViewById(R.id.productRecyclerView)
                 productRecyclerView.layoutManager = LinearLayoutManager(this@ProductListActivity)
                 productRecyclerView.adapter =
-                    ProductAdapter(this@ProductListActivity, filteredProducts, { selectedProduct ->
-                        // TODO use only one dynamic dialog
-                        if (selectedProduct.dilutions.all { it.mode == null })
-                            showDilutionSelectionDialog(selectedProduct)
-                        else
-                            showDialogWithCategorizedItems(selectedProduct)
-                    },
+                    ProductAdapter(
+                        this@ProductListActivity,
+                        filteredProducts,
+                        { selectedProduct ->
+                            // TODO use only one dynamic dialog
+                            if (selectedProduct.dilutions.all { it.mode == null })
+                                showDilutionSelectionDialog(selectedProduct)
+                            else
+                                showDialogWithCategorizedItems(selectedProduct)
+                        },
+                        /* TODO restore edit/delete feature somewhere
                         { selectedProduct ->
                             // Questo è il long click handler
                             val options = arrayOf("Modifica", "Elimina")
@@ -228,7 +232,9 @@ class ProductListActivity : AppCompatActivity() {
                             }
                             builder.show()
                             true
-                        })
+                        }
+                        */
+                    )
             }
         }
     }

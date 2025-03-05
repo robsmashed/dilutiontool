@@ -10,6 +10,7 @@ import android.text.style.ClickableSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -19,14 +20,21 @@ import com.example.dilutiontool.entity.ProductWithDilutions
 class ProductAdapter(
     private val context: Context,
     private var productsWithDilutions: List<ProductWithDilutions>,
-    private val onItemClick: (ProductWithDilutions) -> Unit,
-    private val onLongItemClick: (ProductWithDilutions) -> Boolean
+    private val onItemClick: (ProductWithDilutions) -> Unit
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
-    // Metodo per aggiornare la lista dei prodotti
+    private var isSelectionMode = false
+    private val selectedItems = mutableSetOf<ProductWithDilutions>()
+
     fun updateList(filteredProducts: List<ProductWithDilutions>) {
         productsWithDilutions = filteredProducts
-        notifyDataSetChanged()  // Notifica che la lista dei prodotti è cambiata
+        notifyDataSetChanged()
+    }
+
+    fun setSelectionMode(enabled: Boolean) {
+        isSelectionMode = enabled
+        if (!enabled) selectedItems.clear()  // Reset selezione se disabilitato
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
@@ -36,7 +44,7 @@ class ProductAdapter(
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         val product = productsWithDilutions[position]
-        holder.bind(product)
+        holder.bind(product, isSelectionMode, selectedItems.contains(product))
     }
 
     override fun getItemCount(): Int = productsWithDilutions.size
@@ -46,8 +54,9 @@ class ProductAdapter(
         private val productDescriptionTextView: TextView = itemView.findViewById(R.id.productDescription)
         private val productImageView: ImageView = itemView.findViewById(R.id.productImage)
         private val productLinkTextView: TextView = itemView.findViewById(R.id.productLinkTextView)
+        private val productCheckbox: CheckBox = itemView.findViewById(R.id.productCheckbox)
 
-        fun bind(productWithDilution: ProductWithDilutions) {
+        fun bind(productWithDilution: ProductWithDilutions, isSelectionMode: Boolean, isSelected: Boolean) {
             productNameTextView.text = productWithDilution.product.name
             productDescriptionTextView.text = productWithDilution.product.description
 
@@ -58,34 +67,52 @@ class ProductAdapter(
                     context.startActivity(intent)
                 }
             }
-            spannableString.setSpan(
-                clickableSpan,
-                0,
-                spannableString.length,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+            spannableString.setSpan(clickableSpan, 0, spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             productLinkTextView.text = spannableString
             productLinkTextView.movementMethod = LinkMovementMethod.getInstance()
 
-            // Usa Glide per caricare l'immagine
             Glide.with(itemView.context)
                 .load(productWithDilution.product.image)
                 .placeholder(R.drawable.product_loading)
                 .error(R.drawable.product_loading)
                 .into(productImageView)
 
-            // Gestisci il normale click
             itemView.setOnClickListener {
-                onItemClick(productWithDilution) // Chiamato quando il prodotto viene selezionato
+                if (isSelectionMode) {
+                    toggleSelection(productWithDilution)
+                } else {
+                    onItemClick(productWithDilution)
+                }
             }
 
-            // Gestisci il long click
             itemView.setOnLongClickListener {
-                onLongItemClick(productWithDilution) // Chiamato quando il prodotto viene selezionato
+                if (!isSelectionMode) {
+                    setSelectionMode(true)
+                }
+                toggleSelection(productWithDilution)
+                true
             }
 
-            if (productWithDilution.product.link === null || productWithDilution.product.link.isBlank()) {
+            productCheckbox.visibility = if (isSelectionMode) View.VISIBLE else View.GONE
+            productCheckbox.isChecked = isSelected
+
+            if (productWithDilution.product.link.isNullOrBlank()) {
                 productLinkTextView.visibility = View.INVISIBLE
+            }
+        }
+
+        private fun toggleSelection(product: ProductWithDilutions) {
+            if (selectedItems.contains(product)) {
+                selectedItems.remove(product)
+            } else {
+                selectedItems.add(product)
+            }
+
+            notifyItemChanged(adapterPosition)
+
+            // Se nessun elemento è selezionato, esci dalla modalità selezione
+            if (selectedItems.isEmpty()) {
+                setSelectionMode(false)
             }
         }
     }
