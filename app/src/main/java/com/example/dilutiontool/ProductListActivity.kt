@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter
 import android.widget.ExpandableListView
 import android.widget.SearchView
 import android.widget.SimpleExpandableListAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -42,6 +43,7 @@ class ProductListActivity : AppCompatActivity() {
     private lateinit var fabAddProduct: FloatingActionButton
     private lateinit var fabDeleteProduct: FloatingActionButton
     private lateinit var fabEditProduct: FloatingActionButton
+    private lateinit var noProductsText: TextView
     private var selectedProducts: List<ProductWithDilutions> = emptyList()
 
     private var selectedProductWithDilutions: ProductWithDilutions? = null
@@ -151,6 +153,8 @@ class ProductListActivity : AppCompatActivity() {
         selectedDilution = intent.getParcelableExtra("selectedDilution")
         selectedProductWithDilutions = intent.getParcelableExtra("selectedProductWithDilutions")
 
+        productRecyclerView = findViewById(R.id.productRecyclerView)
+
         fabAddProduct = findViewById(R.id.addFab)
         fabDeleteProduct = findViewById(R.id.deleteFab)
         fabEditProduct = findViewById(R.id.editFab)
@@ -179,6 +183,12 @@ class ProductListActivity : AppCompatActivity() {
         // Aggiungi l'icona di ritorno (freccia) alla Toolbar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.baseline_arrow_back_ios_24)
+
+
+        noProductsText = findViewById(R.id.noProductsText)
+        noProductsText.setOnClickListener {
+            addProduct()
+        }
 
         searchView = findViewById(R.id.searchView)
         searchView.setIconifiedByDefault(false) // Espandi la SearchView di default
@@ -227,7 +237,10 @@ class ProductListActivity : AppCompatActivity() {
             products = db.productDao().getAllProductsWithDilutionsSortedByNameAsc()
             filteredProducts = products
             runOnUiThread {
-                productRecyclerView = findViewById(R.id.productRecyclerView)
+                noProductsText.visibility = if (products.isNotEmpty()) View.GONE else View.VISIBLE
+                searchView.visibility = if (products.isNotEmpty()) View.VISIBLE else View.GONE
+                productRecyclerView.visibility = if (products.isNotEmpty()) View.VISIBLE else View.GONE
+
                 productRecyclerView.layoutManager = LinearLayoutManager(this@ProductListActivity)
                 productRecyclerView.adapter =
                     ProductAdapter(
