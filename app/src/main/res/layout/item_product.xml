@@ -9,6 +9,8 @@
         android:layout_gravity="center_vertical"
         android:layout_width="wrap_content"
         android:layout_marginEnd="16dp"
+        android:focusable="false"
+        android:clickable="false"
         android:layout_height="wrap_content">
     </CheckBox>
 
