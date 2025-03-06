@@ -70,6 +70,8 @@ class ProductListActivity : AppCompatActivity() {
                     println("Errore durante il salvataggio del file.")
                 }
             }
+            updateSelectedProducts(emptyList())
+            fetchProducts()
         } else if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             data?.data?.let { uri ->
                 try {
@@ -96,6 +98,7 @@ class ProductListActivity : AppCompatActivity() {
                         }
 
                         runOnUiThread {
+                            updateSelectedProducts(emptyList())
                             fetchProducts()
                             Toast.makeText(this, productsWithDilutions.size.toString() + " nuovi prodotti inseriti", Toast.LENGTH_SHORT).show()
                         }
@@ -113,6 +116,7 @@ class ProductListActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
+            updateSelectedProducts(emptyList())
             fetchProducts()
         }
     }
