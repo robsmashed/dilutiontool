@@ -302,10 +302,15 @@ class ProductListActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        val foundProduct: ProductWithDilutions? = products.find { it.product.id == selectedProductWithDilutions?.product?.id }
-        val foundDilution = foundProduct?.dilutions?.find { it.id == selectedDilution?.id }
-        setResultIntent(foundDilution, foundProduct)
-        super.onBackPressed()
+        if (selectedProducts.isNotEmpty()) {
+            updateSelectedProducts(emptyList())
+            fetchProducts()
+        } else {
+            val foundProduct: ProductWithDilutions? = products.find { it.product.id == selectedProductWithDilutions?.product?.id }
+            val foundDilution = foundProduct?.dilutions?.find { it.id == selectedDilution?.id }
+            setResultIntent(foundDilution, foundProduct)
+            super.onBackPressed()
+        }
     }
 
     private fun setResultIntent(
