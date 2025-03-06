@@ -125,14 +125,16 @@ class MainActivity : AppCompatActivity() {
 
             selectedProductContainer.visibility = View.VISIBLE
             noSelectedProductLabel.visibility = View.GONE
+            updateDilutionRangeWarning()
         } else {
             discardCurrentProductSelection()
         }
     }
 
     private fun discardCurrentProductSelection() {
-        discardProductSelectionFab.visibility = View.GONE
         selectedProductDilution = null
+        updateDilutionRangeWarning()
+        discardProductSelectionFab.visibility = View.GONE
         selectedProductContainer.visibility = View.GONE
         noSelectedProductLabel.visibility = View.VISIBLE
         seekBar.visibility = View.GONE
@@ -350,15 +352,24 @@ class MainActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 updateSeekbar(editText)
-                if (!isProgrammaticChange) { // Cambiamento fatto dall'utente
+                if (!isProgrammaticChange) {
                     calculateResult(editText)
                 }
+                updateDilutionRangeWarning()
             }
         })
         editText.setSelectAllOnFocus(true);
         editText.setOnClickListener {
             editText.clearFocus()
             editText.requestFocus()
+        }
+    }
+
+    private fun updateDilutionRangeWarning() {
+        if (selectedProductDilution != null && (selectedProductDilution!!.minValue > getDoubleValue(dilutionRatioEditText) || selectedProductDilution!!.value < getDoubleValue(dilutionRatioEditText))) {
+            dilutionRatioEditText.error = "Diluizione fuori range selezionato"
+        } else {
+            dilutionRatioEditText.error = null
         }
     }
 
@@ -413,10 +424,8 @@ class MainActivity : AppCompatActivity() {
             val progress = selectedProductDilution!!.value - currentDilutionValue.toInt()
 
             if (currentDilutionValue == Double.POSITIVE_INFINITY || progress < 0) {
-                // TODO mostra errore fuori range minimo
-                seekBar.progress = 0;
+                seekBar.progress = 0
             } else if (progress > seekBar.max) {
-                // TODO mostra errore fuori range massimo
                 seekBar.progress = seekBar.max
             } else {
                 seekBar.progress = progress
