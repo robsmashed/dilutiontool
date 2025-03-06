@@ -52,4 +52,20 @@ interface ProductDao {
         deleteDilutionsForProduct(productWithDilution.product.id)
         deleteProduct(productWithDilution.product.id)
     }
+
+    @Transaction
+    @Query("DELETE FROM dilution_table WHERE productId IN (:productIds)")
+    fun deleteDilutionsForProducts(productIds: List<Long>)
+
+    @Transaction
+    @Query("DELETE FROM product_table WHERE id IN (:productIds)")
+    fun deleteProducts(productIds: List<Long>)
+
+
+    @Transaction
+    fun deleteProductsAndDilutions(productsWithDilutions: List<ProductWithDilutions>) {
+        val productIds = productsWithDilutions.map { it.product.id }
+        deleteDilutionsForProducts(productIds)
+        deleteProducts(productIds)
+    }
 }

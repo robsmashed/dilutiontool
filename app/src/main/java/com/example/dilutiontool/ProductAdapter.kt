@@ -20,7 +20,8 @@ import com.example.dilutiontool.entity.ProductWithDilutions
 class ProductAdapter(
     private val context: Context,
     private var productsWithDilutions: List<ProductWithDilutions>,
-    private val onItemClick: (ProductWithDilutions) -> Unit
+    private val onItemClick: (ProductWithDilutions) -> Unit,
+    private val onSelectionChange: (MutableSet<ProductWithDilutions>) -> Unit
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     private var isSelectionMode = false
@@ -114,6 +115,8 @@ class ProductAdapter(
             if (selectedItems.isEmpty()) {
                 setSelectionMode(false)
             }
+
+            onSelectionChange(selectedItems) // Notifica l'Activity
         }
     }
 }

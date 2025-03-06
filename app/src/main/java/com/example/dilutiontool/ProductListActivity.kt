@@ -5,8 +5,10 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.ExpandableListView
@@ -38,6 +40,10 @@ class ProductListActivity : AppCompatActivity() {
     private lateinit var filteredProducts: List<ProductWithDilutions>
     private lateinit var productRecyclerView: RecyclerView
     private lateinit var searchView: SearchView
+    private lateinit var fabAddProduct: FloatingActionButton
+    private lateinit var fabDeleteProduct: FloatingActionButton
+    private lateinit var fabEditProduct: FloatingActionButton
+    private var selectedProducts: List<ProductWithDilutions> = emptyList()
 
     private var selectedProductWithDilutions: ProductWithDilutions? = null
     private var selectedDilution: Dilution? = null
@@ -102,12 +108,13 @@ class ProductListActivity : AppCompatActivity() {
         }
     }
 
-    private val activityResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                fetchProducts()
-            }
+    private val activityResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            fetchProducts()
         }
+    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_product_list, menu)
@@ -145,6 +152,28 @@ class ProductListActivity : AppCompatActivity() {
         selectedDilution = intent.getParcelableExtra("selectedDilution")
         selectedProductWithDilutions = intent.getParcelableExtra("selectedProductWithDilutions")
 
+        fabAddProduct = findViewById(R.id.addFab)
+        fabDeleteProduct = findViewById(R.id.deleteFab)
+        fabEditProduct = findViewById(R.id.editFab)
+        fabAddProduct.setOnClickListener {
+            addProduct()
+        }
+        fabDeleteProduct.setOnClickListener {
+            val productNames = selectedProducts.joinToString("\n") { "• ${it.product.name}" }
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Conferma eliminazione")
+                .setMessage("Sei sicuro di voler eliminare i prodotti selezionati?\n\n$productNames")
+                .setPositiveButton("Conferma") { _, _ ->
+                    deleteProducts(selectedProducts.toList())
+                }
+                .setNegativeButton("Annulla", null)
+                .create()
+            dialog.show()
+        }
+        fabEditProduct.setOnClickListener {
+            addProduct(selectedProducts[0])
+        }
+
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -181,14 +210,7 @@ class ProductListActivity : AppCompatActivity() {
             }
         })
 
-        val fabAddProduct: FloatingActionButton = findViewById(R.id.fab)
-
-        fabAddProduct.setOnClickListener {
-            addProduct()
-        }
-
         db = getDatabase(this)
-
         fetchProducts()
     }
 
@@ -219,21 +241,12 @@ class ProductListActivity : AppCompatActivity() {
                             else
                                 showDialogWithCategorizedItems(selectedProduct)
                         },
-                        /* TODO restore edit/delete feature somewhere
-                        { selectedProduct ->
-                            // Questo è il long click handler
-                            val options = arrayOf("Modifica", "Elimina")
-                            val builder = android.app.AlertDialog.Builder(this@ProductListActivity)
-                            builder.setItems(options) { _, which ->
-                                when (which) {
-                                    0 -> addProduct(selectedProduct)
-                                    1 -> deleteProduct(selectedProduct)
-                                }
-                            }
-                            builder.show()
-                            true
+                        { selectedProducts ->
+                            this.selectedProducts = selectedProducts.toList()
+                            fabAddProduct.visibility = if (selectedProducts.isNotEmpty()) View.GONE else View.VISIBLE
+                            fabDeleteProduct.visibility = if (selectedProducts.isNotEmpty()) View.VISIBLE else View.GONE
+                            fabEditProduct.visibility = if (selectedProducts.isNotEmpty() && selectedProducts.count() == 1) View.VISIBLE else View.GONE
                         }
-                        */
                     )
             }
         }
@@ -247,6 +260,18 @@ class ProductListActivity : AppCompatActivity() {
             runOnUiThread {
                 fetchProducts()
                 Toast.makeText(this, "Il prodotto è stato rimosso", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun deleteProducts(productsWithDilutions: List<ProductWithDilutions>) {
+        val executor = Executors.newSingleThreadExecutor()
+        executor.execute {
+            db.productDao().deleteProductsAndDilutions(productsWithDilutions)
+
+            runOnUiThread {
+                fetchProducts()
+                Toast.makeText(this, "I prodotti selezionati sono stati rimossi", Toast.LENGTH_SHORT).show()
             }
         }
     }
