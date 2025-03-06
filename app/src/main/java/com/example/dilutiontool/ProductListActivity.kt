@@ -5,7 +5,6 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -242,14 +241,18 @@ class ProductListActivity : AppCompatActivity() {
                                 showDialogWithCategorizedItems(selectedProduct)
                         },
                         { selectedProducts ->
-                            this.selectedProducts = selectedProducts.toList()
-                            fabAddProduct.visibility = if (selectedProducts.isNotEmpty()) View.GONE else View.VISIBLE
-                            fabDeleteProduct.visibility = if (selectedProducts.isNotEmpty()) View.VISIBLE else View.GONE
-                            fabEditProduct.visibility = if (selectedProducts.isNotEmpty() && selectedProducts.count() == 1) View.VISIBLE else View.GONE
+                            updateSelectedProducts(selectedProducts.toList())
                         }
                     )
             }
         }
+    }
+
+    private fun updateSelectedProducts(selectedProducts: List<ProductWithDilutions>) {
+        this.selectedProducts = selectedProducts
+        fabAddProduct.visibility = if (this.selectedProducts.isNotEmpty()) View.GONE else View.VISIBLE
+        fabDeleteProduct.visibility = if (this.selectedProducts.isNotEmpty()) View.VISIBLE else View.GONE
+        fabEditProduct.visibility = if (this.selectedProducts.isNotEmpty() && this.selectedProducts.count() == 1) View.VISIBLE else View.GONE
     }
 
     private fun deleteProduct(productWithDilutions: ProductWithDilutions) {
@@ -270,6 +273,7 @@ class ProductListActivity : AppCompatActivity() {
             db.productDao().deleteProductsAndDilutions(productsWithDilutions)
 
             runOnUiThread {
+                updateSelectedProducts(emptyList())
                 fetchProducts()
                 Toast.makeText(this, "I prodotti selezionati sono stati rimossi", Toast.LENGTH_SHORT).show()
             }
