@@ -69,7 +69,7 @@ class ProductAdapter(
             }
             spannableString.setSpan(clickableSpan, 0, spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             productLinkTextView.text = spannableString
-            productLinkTextView.movementMethod = LinkMovementMethod.getInstance()
+            productLinkTextView.movementMethod = if (isSelectionMode) null else LinkMovementMethod.getInstance()
 
             Glide.with(itemView.context)
                 .load(productWithDilution.product.image)
