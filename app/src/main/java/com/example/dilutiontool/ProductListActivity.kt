@@ -42,7 +42,6 @@ class ProductListActivity : AppCompatActivity() {
     private lateinit var searchView: SearchView
     private lateinit var fabAddProduct: FloatingActionButton
     private lateinit var fabDeleteProduct: FloatingActionButton
-    private lateinit var fabEditProduct: FloatingActionButton
     private lateinit var noProductsText: TextView
     private var selectedProducts: List<ProductWithDilutions> = emptyList()
 
@@ -152,6 +151,19 @@ class ProductListActivity : AppCompatActivity() {
         }
     }
 
+    fun onDeleteProductsClick(productsToDelete: List<ProductWithDilutions>) {
+        val productNames = productsToDelete.joinToString("\n") { "• ${it.product.name}" }
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Conferma eliminazione")
+            .setMessage("Sei sicuro di voler eliminare i prodotti selezionati?\n\n$productNames")
+            .setPositiveButton("Conferma") { _, _ ->
+                deleteProducts(productsToDelete.toList())
+            }
+            .setNegativeButton("Annulla", null)
+            .create()
+        dialog.show()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_list)
@@ -163,24 +175,11 @@ class ProductListActivity : AppCompatActivity() {
 
         fabAddProduct = findViewById(R.id.addFab)
         fabDeleteProduct = findViewById(R.id.deleteFab)
-        fabEditProduct = findViewById(R.id.editFab)
         fabAddProduct.setOnClickListener {
             addProduct()
         }
         fabDeleteProduct.setOnClickListener {
-            val productNames = selectedProducts.joinToString("\n") { "• ${it.product.name}" }
-            val dialog = AlertDialog.Builder(this)
-                .setTitle("Conferma eliminazione")
-                .setMessage("Sei sicuro di voler eliminare i prodotti selezionati?\n\n$productNames")
-                .setPositiveButton("Conferma") { _, _ ->
-                    deleteProducts(selectedProducts.toList())
-                }
-                .setNegativeButton("Annulla", null)
-                .create()
-            dialog.show()
-        }
-        fabEditProduct.setOnClickListener {
-            addProduct(selectedProducts[0])
+            onDeleteProductsClick(selectedProducts)
         }
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -261,7 +260,13 @@ class ProductListActivity : AppCompatActivity() {
                         },
                         { selectedProducts ->
                             updateSelectedProducts(selectedProducts.toList())
-                        }
+                        },
+                        { productToDelete ->
+                            onDeleteProductsClick(listOf(productToDelete))
+                        },
+                        { productToEdit ->
+                            addProduct(productToEdit)
+                        },
                     )
             }
         }
@@ -271,19 +276,6 @@ class ProductListActivity : AppCompatActivity() {
         this.selectedProducts = selectedProducts
         fabAddProduct.visibility = if (this.selectedProducts.isNotEmpty()) View.GONE else View.VISIBLE
         fabDeleteProduct.visibility = if (this.selectedProducts.isNotEmpty()) View.VISIBLE else View.GONE
-        fabEditProduct.visibility = if (this.selectedProducts.isNotEmpty() && this.selectedProducts.count() == 1) View.VISIBLE else View.GONE
-    }
-
-    private fun deleteProduct(productWithDilutions: ProductWithDilutions) {
-        val executor = Executors.newSingleThreadExecutor()
-        executor.execute {
-            db.productDao().deleteProductAndDilutions(productWithDilutions)
-
-            runOnUiThread {
-                fetchProducts()
-                Toast.makeText(this, "Il prodotto è stato rimosso", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     private fun deleteProducts(productsWithDilutions: List<ProductWithDilutions>) {
@@ -294,7 +286,7 @@ class ProductListActivity : AppCompatActivity() {
             runOnUiThread {
                 updateSelectedProducts(emptyList())
                 fetchProducts()
-                Toast.makeText(this, "I prodotti selezionati sono stati rimossi", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "I prodotti sono stati rimossi", Toast.LENGTH_SHORT).show()
             }
         }
     }

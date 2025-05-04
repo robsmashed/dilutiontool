@@ -1,4 +1,4 @@
-package com.example.dilutiontool // Assicurati che il pacchetto sia corretto
+package com.example.dilutiontool
 
 import android.content.Context
 import android.content.Intent
@@ -8,10 +8,13 @@ import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -21,7 +24,9 @@ class ProductAdapter(
     private val context: Context,
     private var productsWithDilutions: List<ProductWithDilutions>,
     private val onItemClick: (ProductWithDilutions) -> Unit,
-    private val onSelectionChange: (MutableSet<ProductWithDilutions>) -> Unit
+    private val onSelectionChange: (MutableSet<ProductWithDilutions>) -> Unit,
+    private val onItemDelete: (ProductWithDilutions) -> Unit,
+    private val onItemEdit: (ProductWithDilutions) -> Unit,
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     private var isSelectionMode = false
@@ -56,6 +61,7 @@ class ProductAdapter(
         private val productImageView: ImageView = itemView.findViewById(R.id.productImage)
         private val productLinkTextView: TextView = itemView.findViewById(R.id.productLinkTextView)
         private val productCheckbox: CheckBox = itemView.findViewById(R.id.productCheckbox)
+        private val productMoreButton: ImageButton = itemView.findViewById(R.id.itemOptionsMenu)
 
         fun bind(productWithDilution: ProductWithDilutions, isSelectionMode: Boolean, isSelected: Boolean) {
             productNameTextView.text = productWithDilution.product.name
@@ -99,6 +105,27 @@ class ProductAdapter(
 
             if (productWithDilution.product.link.isNullOrBlank()) {
                 productLinkTextView.visibility = View.INVISIBLE
+            }
+
+            // add roduct item edit/delete menu
+            productMoreButton.setOnClickListener { view ->
+                val popupMenu = PopupMenu(context, view)
+                val inflater = popupMenu.menuInflater
+                inflater.inflate(R.menu.menu_more, popupMenu.menu)
+                popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+                    when (item.itemId) {
+                        R.id.action_edit -> {
+                            onItemEdit(productWithDilution)
+                            true
+                        }
+                        R.id.action_delete -> {
+                            onItemDelete(productWithDilution)
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                popupMenu.show()
             }
         }
 
