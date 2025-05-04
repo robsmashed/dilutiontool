@@ -149,6 +149,7 @@ class MainActivity : AppCompatActivity() {
         productSelectionLauncher.launch(intent)
     }
 
+    /* Disabling main menu with settings option
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
@@ -162,6 +163,7 @@ class MainActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
+    */
 
     private fun limitDecimalInput(editText: EditText) {
         editText.addTextChangedListener(object : TextWatcher {
