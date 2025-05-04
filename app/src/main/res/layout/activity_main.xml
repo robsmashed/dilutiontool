@@ -24,6 +24,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/totalLiquidLockCheckBoxContainer"
             android:orientation="horizontal">
 
             <TextView
@@ -69,6 +70,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/dilutionRatioLockCheckBoxContainer"
             android:orientation="horizontal">
 
             <TextView
@@ -117,6 +119,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/waterResultTextLockCheckBoxContainer"
             android:orientation="horizontal">
 
             <TextView
@@ -159,8 +162,10 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/resultTextLockCheckBoxContainer"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"

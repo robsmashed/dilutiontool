@@ -19,9 +19,11 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.children
 import com.bumptech.glide.Glide
 import com.example.dilutiontool.DilutionUtils.getDescription
 import com.example.dilutiontool.entity.Dilution
@@ -328,6 +330,23 @@ class MainActivity : AppCompatActivity() {
                         otherCheckBox.isEnabled = true // Riabilita tutte le checkbox
                     }
                     enableProductSelection(false)
+                }
+            }
+        }
+
+        // Allow checkbox check/uncheck by clicking on titles
+        listOf(
+            findViewById<LinearLayout>(R.id.totalLiquidLockCheckBoxContainer),
+            findViewById<LinearLayout>(R.id.dilutionRatioLockCheckBoxContainer),
+            findViewById<LinearLayout>(R.id.waterResultTextLockCheckBoxContainer),
+            findViewById<LinearLayout>(R.id.resultTextLockCheckBoxContainer)
+        ).forEach { container ->
+            container.setOnClickListener {
+                val checkBox = container.children.filterIsInstance<CheckBox>().firstOrNull() // Trova la prima CheckBox figlia nel LinearLayout
+                checkBox?.let {
+                    if (checkBox.isEnabled) {
+                        checkBox.isChecked = !checkBox.isChecked
+                    }
                 }
             }
         }
