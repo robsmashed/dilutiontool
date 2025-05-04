@@ -10,8 +10,6 @@ import android.text.Spanned
 import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
@@ -19,10 +17,10 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import com.bumptech.glide.Glide
 import com.example.dilutiontool.DilutionUtils.getDescription
@@ -388,7 +386,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateDilutionRangeWarning() {
         if (selectedProductDilution != null && (selectedProductDilution!!.minValue > getDoubleValue(dilutionRatioEditText) || selectedProductDilution!!.value < getDoubleValue(dilutionRatioEditText))) {
-            dilutionRatioEditText.error = "Diluizione fuori range selezionato"
+            val warningIcon = ContextCompat.getDrawable(this, R.drawable.baseline_warning_24)
+            warningIcon?.setBounds(0, 0, warningIcon.intrinsicWidth, warningIcon.intrinsicHeight)
+            dilutionRatioEditText.setError("Diluizione fuori range prodotto", warningIcon)
         } else {
             dilutionRatioEditText.error = null
         }
