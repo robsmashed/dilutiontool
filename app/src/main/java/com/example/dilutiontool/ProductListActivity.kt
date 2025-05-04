@@ -115,9 +115,11 @@ class ProductListActivity : AppCompatActivity() {
     private val activityResultLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
+        updateSelectedProducts(emptyList())
+        fetchProducts()
+
         if (result.resultCode == RESULT_OK) {
-            updateSelectedProducts(emptyList())
-            fetchProducts()
+
         }
     }
 
