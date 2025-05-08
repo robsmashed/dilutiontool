@@ -362,7 +362,7 @@ class ProductListActivity : AppCompatActivity() {
         val items = sortedDilutions.groupBy { it.mode }.values.toList()
 
         // Crea una lista di mappe per la struttura dei dati
-        val groupData = categories.map { mapOf("CATEGORY" to it) }
+        val groupData = categories.map { mapOf("CATEGORY" to (it ?: "Categoria non definita")) }
         val childData = items.map { it.map { item -> mapOf("ITEM" to getDescription(item)) } }
 
         // Crea un SimpleExpandableListAdapter
@@ -381,6 +381,11 @@ class ProductListActivity : AppCompatActivity() {
         // Crea l'ExpandableListView
         val expandableListView = ExpandableListView(this)
         expandableListView.setAdapter(expandableListAdapter)
+
+        // Espandi la categoria se unica
+        if (categories.size == 1) {
+            expandableListView.expandGroup(0)
+        }
 
         // Imposta il listener per il click sui bambini (elementi)
         expandableListView.setOnChildClickListener { _, _, groupPosition, childPosition, _ ->
