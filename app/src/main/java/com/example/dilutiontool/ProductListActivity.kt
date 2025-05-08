@@ -63,10 +63,10 @@ class ProductListActivity : AppCompatActivity() {
                     outputStream?.write(json.toByteArray())
                     outputStream?.close()
 
-                    println("File salvato con successo a: $uri")
+                    Toast.makeText(this, "File salvato con successo a: $uri", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    println("Errore durante il salvataggio del file.")
+                    Toast.makeText(this, "Errore durante il salvataggio del file.", Toast.LENGTH_SHORT).show()
                 }
             }
             updateSelectedProducts(emptyList())
@@ -104,7 +104,7 @@ class ProductListActivity : AppCompatActivity() {
                     }
 
                 } catch (e: Exception) {
-                    // TODO
+                    Toast.makeText(this, " Errore nell'aggiunta dei prodotti selezionati", Toast.LENGTH_SHORT).show()
                     e.printStackTrace()
                 }
             }
@@ -118,7 +118,7 @@ class ProductListActivity : AppCompatActivity() {
         fetchProducts()
 
         if (result.resultCode == RESULT_OK) {
-
+            Toast.makeText(this, "Prodotto " + if (result.data?.getBooleanExtra("isAdd", true) === true) "aggiunto" else "modificato" + " correttamente", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -281,12 +281,17 @@ class ProductListActivity : AppCompatActivity() {
     private fun deleteProducts(productsWithDilutions: List<ProductWithDilutions>) {
         val executor = Executors.newSingleThreadExecutor()
         executor.execute {
-            db.productDao().deleteProductsAndDilutions(productsWithDilutions)
+            val deletedIds = db.productDao().deleteProductsAndDilutions(productsWithDilutions)
 
             runOnUiThread {
                 updateSelectedProducts(emptyList())
                 fetchProducts()
-                Toast.makeText(this, "I prodotti sono stati rimossi", Toast.LENGTH_SHORT).show()
+
+                if (deletedIds.size > 1) {
+                    Toast.makeText(this, "I prodotti selezionati sono stati rimossi", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Il prodotto è stato rimosso", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

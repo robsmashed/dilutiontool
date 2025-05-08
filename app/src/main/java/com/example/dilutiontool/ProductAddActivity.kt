@@ -140,7 +140,7 @@ class ProductAddActivity : AppCompatActivity() {
             builder.show()
         }
 
-        val productWithDilutions = intent.getParcelableExtra<ProductWithDilutions>("PRODUCT_WITH_DILUTIONS")
+        val productWithDilutions = getCurrentProductWithDilutions()
         if (productWithDilutions != null) {
             productWithDilutions.let {
                 productNameInput.setText(it.product.name)
@@ -214,6 +214,10 @@ class ProductAddActivity : AppCompatActivity() {
         }
     }
 
+    private fun getCurrentProductWithDilutions(): ProductWithDilutions? {
+        return intent.getParcelableExtra<ProductWithDilutions>("PRODUCT_WITH_DILUTIONS")
+    }
+
     private fun saveProductWithDilutions(productWithDilutions: ProductWithDilutions) {
         if (productWithDilutions.product.name.isNotEmpty() && productWithDilutions.dilutions.isNotEmpty()) {
             val db: AppDatabase = getDatabase(this)
@@ -232,6 +236,7 @@ class ProductAddActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     val resultIntent = Intent()
+                    resultIntent.putExtra("isAdd", getCurrentProductWithDilutions() === null)
                     setResult(RESULT_OK, resultIntent)  // Imposta il risultato
                     finish()
                 }
