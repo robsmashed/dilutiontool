@@ -239,35 +239,32 @@ class ProductListActivity : AppCompatActivity() {
     private fun fetchProducts() {
         val executor = Executors.newSingleThreadExecutor()
         executor.execute {
+            // Recupera i prodotti
             products = db.productDao().getAllProductsWithDilutionsSortedByNameAsc()
             filteredProducts = products
+
             runOnUiThread {
+                // Gestisci la visibilità degli elementi
                 noProductsText.visibility = if (products.isNotEmpty()) View.GONE else View.VISIBLE
                 searchView.visibility = if (products.isNotEmpty()) View.VISIBLE else View.GONE
                 productRecyclerView.visibility = if (products.isNotEmpty()) View.VISIBLE else View.GONE
 
+                // Imposta il layoutManager e l'adapter
                 productRecyclerView.layoutManager = LinearLayoutManager(this@ProductListActivity)
-                productRecyclerView.adapter =
-                    ProductAdapter(
-                        this@ProductListActivity,
-                        filteredProducts,
-                        { selectedProduct ->
-                            // TODO use only one dynamic dialog
-                            if (selectedProduct.dilutions.all { it.mode == null })
-                                showDilutionSelectionDialog(selectedProduct)
-                            else
-                                showDialogWithCategorizedItems(selectedProduct)
-                        },
-                        { selectedProducts ->
-                            updateSelectedProducts(selectedProducts.toList())
-                        },
-                        { productToDelete ->
-                            onDeleteProductsClick(listOf(productToDelete))
-                        },
-                        { productToEdit ->
-                            addProduct(productToEdit)
-                        },
-                    )
+                productRecyclerView.adapter = ProductAdapter(
+                    this@ProductListActivity,
+                    filteredProducts,
+                    { selectedProduct ->
+                        // TODO use only one dynamic dialog
+                        if (selectedProduct.dilutions.all { it.mode == null })
+                            showDilutionSelectionDialog(selectedProduct)
+                        else
+                            showDialogWithCategorizedItems(selectedProduct)
+                    },
+                    { selectedProducts -> updateSelectedProducts(selectedProducts.toList()) },
+                    { productToDelete -> onDeleteProductsClick(listOf(productToDelete)) },
+                    { productToEdit -> addProduct(productToEdit) },
+                )
             }
         }
     }
