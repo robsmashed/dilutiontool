@@ -1,6 +1,7 @@
 package com.example.dilutiontool
 
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -22,6 +23,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.dilutiontool.DilutionUtils.getDescription
 import com.example.dilutiontool.entity.Dilution
@@ -29,6 +33,8 @@ import com.example.dilutiontool.entity.ProductWithDilutions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.Locale
 import kotlin.math.roundToInt
+
+data class Item(val label: String, val valueSuffix: String)
 
 class MainActivity : AppCompatActivity() {
     private var selectedProductWithDilutions: ProductWithDilutions? = null
@@ -47,6 +53,20 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedProductContainer: LinearLayout
     private lateinit var noSelectedProductLabel: TextView
     var isProgrammaticChange = false // Flag per sapere se il cambiamento è programmatico
+    private lateinit var recycler: RecyclerView
+    private val items = mutableListOf(
+        Item("Quantità Totale", "ml"),
+        Item("Rapporto di diluizione", ":1"),
+        Item("Quantità di acqua", "ml"),
+        Item("Quantità di prodotto", "ml"),
+    )
+    private lateinit var draggableAdapter: DraggableAdapter
+
+    class NoScrollLinearLayoutManager(context: Context) : LinearLayoutManager(context) {
+        override fun canScrollVertically(): Boolean {
+            return false // Disabilita lo scroll verticale
+        }
+    }
 
     private val productSelectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -276,6 +296,29 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        recycler = findViewById(R.id.recyclerTop)
+
+        // Inizializza l'adapter
+        draggableAdapter = DraggableAdapter(items)
+
+        // Crea un callback per il touch helper
+        val callbackTop = DragManageAdapter(draggableAdapter, items)
+
+        // Inizializza l'ItemTouchHelper
+        val itemTouchHelper = ItemTouchHelper(callbackTop)
+
+        // Associa l'ItemTouchHelper all'adapter
+        draggableAdapter.setTouchHelper(itemTouchHelper)
+
+        // Imposta l'adapter al RecyclerView e il layout manager
+        recycler.apply {
+            layoutManager = NoScrollLinearLayoutManager(this@MainActivity)
+            adapter = draggableAdapter
+        }
+
+        // Attacca l'ItemTouchHelper al RecyclerView
+        itemTouchHelper.attachToRecyclerView(recycler)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)

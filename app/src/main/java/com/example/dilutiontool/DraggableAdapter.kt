@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
 class DraggableAdapter(
-    private val items: MutableList<String>
+    private val items: MutableList<Item>
 ) : RecyclerView.Adapter<DraggableAdapter.ViewHolder>() {
 
     private var touchHelper: ItemTouchHelper? = null
@@ -27,7 +27,9 @@ class DraggableAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textView.text = items[position]
+        val currentItem = items[position]
+        holder.title.text = currentItem.label
+        holder.valueSuffix.text = currentItem.valueSuffix
 
         // Cambia lo sfondo dei primi 2 elementi
         if (position == 0 || position == 1) {
@@ -45,20 +47,21 @@ class DraggableAdapter(
         notifyItemMoved(from, to)
     }
 
-    fun removeItem(position: Int): String {
+    fun removeItem(position: Int): Item {
         val item = items.removeAt(position)
         notifyItemRemoved(position)
         return item
     }
 
-    fun addItem(item: String, position: Int) {
+    fun addItem(item: Item, position: Int) {
         items.add(position, item)
         notifyItemInserted(position)
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val textView: TextView = itemView.findViewById(R.id.itemText)
         val handle: ImageView = itemView.findViewById(R.id.handle)
+        val title: TextView = itemView.findViewById(R.id.title)
+        val valueSuffix: TextView = itemView.findViewById(R.id.valueSuffix)
 
         init {
             handle.setOnTouchListener { v, event ->
