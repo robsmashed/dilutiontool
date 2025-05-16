@@ -1,14 +1,18 @@
 package com.example.dilutiontool
 
 import android.animation.ObjectAnimator
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.LayerDrawable
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Locale
@@ -40,6 +44,15 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         holder.valueEditText.removeTextChangedListener(holder.textWatcher)
         holder.valueEditText.setText(getStringValue(currentItem.value))
         holder.valueEditText.addTextChangedListener(holder.textWatcher)
+
+        // Carica l'immagine corrispondente e il gradiente e combina con LayerDrawable
+        val context = holder.itemView.context
+        val layerDrawable = LayerDrawable(arrayOf(
+            ContextCompat.getDrawable(context, currentItem.bgResId),
+            ContextCompat.getDrawable(context, R.drawable.fade_gradient)
+        ))
+        layerDrawable.setLayerGravity(0, Gravity.CENTER)
+        holder.itemView.background = layerDrawable
     }
 
     fun getPhaseLabelForPosition(position: Int): String {

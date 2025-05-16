@@ -33,6 +33,7 @@ data class Item(
     val id: ItemId,
     val label: String,
     val valueSuffix: String,
+    val bgResId: Int,
     var value: Double = 0.0,
 )
 
@@ -60,10 +61,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var noSelectedProductLabel: TextView
     private lateinit var recycler: RecyclerView
     private val items = mutableListOf(
-        Item(ItemId.QUANTITY, "Quantità totale", "ml"),
-        Item(ItemId.DILUTION, "Rapporto di diluizione", ":1"),
-        Item(ItemId.WATER, "Quantità di acqua", "ml"),
-        Item(ItemId.CONCENTRATE, "Quantità di prodotto", "ml"),
+        Item(ItemId.QUANTITY, "Quantità totale", "ml", R.drawable.bg_quantity),
+        Item(ItemId.DILUTION, "Rapporto di diluizione", ":1", R.drawable.bg_dilution),
+        Item(ItemId.WATER, "Quantità di acqua", "ml", R.drawable.bg_water),
+        Item(ItemId.CONCENTRATE, "Quantità di prodotto", "ml", R.drawable.bg_concentrate),
     )
     private lateinit var draggableAdapter: DraggableAdapter
 
