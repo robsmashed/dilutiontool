@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
     var isProgrammaticChange = false // Flag per sapere se il cambiamento è programmatico
     private lateinit var recycler: RecyclerView
     private val items = mutableListOf(
-        Item("Quantità Totale", "ml"),
+        Item("Quantità totale", "ml"),
         Item("Rapporto di diluizione", ":1"),
         Item("Quantità di acqua", "ml"),
         Item("Quantità di prodotto", "ml"),

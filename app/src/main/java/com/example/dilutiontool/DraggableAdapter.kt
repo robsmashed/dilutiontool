@@ -30,12 +30,14 @@ class DraggableAdapter(
         val currentItem = items[position]
         holder.title.text = currentItem.label
         holder.valueSuffix.text = currentItem.valueSuffix
+        holder.phase.text = getPhaseLabelForPosition(position)
+    }
 
-        // Cambia lo sfondo dei primi 2 elementi
-        if (position == 0 || position == 1) {
-            holder.itemView.setBackgroundColor(Color.RED) // Imposta il colore rosso per i primi 2 elementi
-        } else {
-            holder.itemView.setBackgroundColor(Color.TRANSPARENT) // Imposta uno sfondo trasparente per gli altri
+    fun getPhaseLabelForPosition(position: Int): String {
+        return when (position) {
+            0 -> "FASE 1"
+            1 -> "FASE 2"
+            else -> "RISULTATO"
         }
     }
 
@@ -62,6 +64,7 @@ class DraggableAdapter(
         val handle: ImageView = itemView.findViewById(R.id.handle)
         val title: TextView = itemView.findViewById(R.id.title)
         val valueSuffix: TextView = itemView.findViewById(R.id.valueSuffix)
+        val phase: TextView = itemView.findViewById(R.id.phase)
 
         init {
             handle.setOnTouchListener { v, event ->

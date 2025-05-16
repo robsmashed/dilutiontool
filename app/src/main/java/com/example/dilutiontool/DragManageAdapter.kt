@@ -23,6 +23,14 @@ class DragManageAdapter(
         val fromPos = viewHolder.adapterPosition
         val toPos = target.adapterPosition
         adapter.moveItem(fromPos, toPos)
+
+        for (i in 0 until adapter.itemCount) {
+            val vh = recyclerView.findViewHolderForAdapterPosition(i)
+            if (vh is DraggableAdapter.ViewHolder) {
+                vh.phase.text = adapter.getPhaseLabelForPosition(i)
+            }
+        }
+
         return true
     }
 
