@@ -14,14 +14,13 @@
         app:subtitleTextColor="@color/white"
         app:titleTextColor="@color/white" />
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
 
         <LinearLayout
-            android:padding="15dp"
+            android:background="@android:color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
@@ -31,194 +30,7 @@
                 android:id="@+id/recyclerTop"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#E0E0E0" />
-
-            <LinearLayout
-                android:id="@+id/totalLiquidLockCheckBoxContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="4dp"
-                    android:text="Quantità totale"
-                    android:textAlignment="center"
-                    android:textSize="26sp"
-                    android:textStyle="bold" />
-
-                <CheckBox
-                    android:id="@+id/totalLiquidLockCheckBox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/totalEditText"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:hint="0"
-                    android:inputType="numberDecimal"
-                    android:text="0" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:paddingEnd="4dp"
-                    android:text="ml"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/dilutionRatioLockCheckBoxContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="4dp"
-                    android:text="Rapporto di diluizione"
-                    android:textAlignment="center"
-                    android:textSize="26sp"
-                    android:textStyle="bold" />
-
-                <CheckBox
-                    android:id="@+id/dilutionRatioLockCheckBox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-            </LinearLayout>
-
-
-            <!-- Layout orizzontale per "1:" e l'input del valore di diluizione -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <!-- Campo di input per il valore di diluizione con hint aggiornato -->
-                <EditText
-                    android:id="@+id/dilutionRatioEditText"
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:hint="0"
-                    android:inputType="numberDecimal"
-                    android:text="0" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:paddingEnd="4dp"
-                    android:text=":1"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/waterResultTextLockCheckBoxContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="4dp"
-                    android:text="Quantità di acqua"
-                    android:textAlignment="center"
-                    android:textSize="26sp"
-                    android:textStyle="bold" />
-
-                <CheckBox
-                    android:id="@+id/waterResultTextLockCheckBox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:enabled="false" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <EditText
-                    android:id="@+id/waterEditText"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:enabled="false"
-                    android:gravity="center"
-                    android:hint="0"
-                    android:inputType="numberDecimal" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:paddingEnd="4dp"
-                    android:text="ml"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/resultTextLockCheckBoxContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="4dp"
-                    android:text="Quantità di prodotto"
-                    android:textAlignment="center"
-                    android:textSize="26sp"
-                    android:textStyle="bold" />
-
-                <CheckBox
-                    android:id="@+id/resultTextLockCheckBox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:enabled="false" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/concentrateEditText"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:enabled="false"
-                    android:gravity="center"
-                    android:hint="0"
-                    android:inputType="numberDecimal" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:paddingEnd="4dp"
-                    android:text="ml"
-                    android:textSize="16sp" />
-            </LinearLayout>
+                android:layout_weight="1" />
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -236,6 +48,7 @@
                     app:fabCustomSize="35dp" />
 
                 <LinearLayout
+                    android:padding="15dp"
                     android:id="@+id/productContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
