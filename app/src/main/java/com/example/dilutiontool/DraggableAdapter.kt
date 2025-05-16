@@ -1,7 +1,6 @@
 package com.example.dilutiontool
 
 import android.animation.ObjectAnimator
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.text.Editable
 import android.text.TextWatcher
@@ -92,6 +91,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
                 }
 
                 val item = items[bindingAdapterPosition]
+                item.value = getDoubleValue(valueEditText)
                 calculateResult(item.id)
                 // updateDilutionRangeWarning() TODO
             }
@@ -157,35 +157,35 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         }
     }
 
-    private fun calculateResult(currentEditText: ItemId) {
+    private fun calculateResult(currentItemId: ItemId) {
         val totalLiquidIndex = items.indexOfFirst { it.id == ItemId.QUANTITY }
         val dilutionRatioIndex = items.indexOfFirst { it.id == ItemId.DILUTION }
         val waterIndex = items.indexOfFirst { it.id == ItemId.WATER }
         val concentrateIndex = items.indexOfFirst { it.id == ItemId.CONCENTRATE }
 
-        val totalLiquidEditText = items[totalLiquidIndex]
-        val dilutionRatioEditText = items[dilutionRatioIndex]
-        val waterEditText = items[waterIndex]
-        val concentrateEditText = items[concentrateIndex]
+        val totalLiquidItem = items[totalLiquidIndex]
+        val dilutionRatioItem = items[dilutionRatioIndex]
+        val waterItem = items[waterIndex]
+        val concentrateItem = items[concentrateIndex]
 
-        var totalLiquid = totalLiquidEditText.value
-        var dilutionRatio = dilutionRatioEditText.value
-        var water = waterEditText.value
-        var concentrate = concentrateEditText.value
+        var totalLiquid = totalLiquidItem.value
+        var dilutionRatio = dilutionRatioItem.value
+        var water = waterItem.value
+        var concentrate = concentrateItem.value
 
         if (getEnabledForPosition(totalLiquidIndex) && getEnabledForPosition(dilutionRatioIndex)) {
             concentrate = totalLiquid / (dilutionRatio + 1)
             water = totalLiquid - concentrate
-            concentrateEditText.value = concentrate
-            waterEditText.value = water
+            concentrateItem.value = concentrate
+            waterItem.value = water
         } else if (getEnabledForPosition(totalLiquidIndex) && getEnabledForPosition(waterIndex)) {
             if (totalLiquid - water < 0) {
-                if (currentEditText !== ItemId.WATER) {
+                if (currentItemId !== ItemId.WATER) {
                     water = totalLiquid
-                    waterEditText.value = totalLiquid
-                } else if (currentEditText !== ItemId.QUANTITY) {
+                    waterItem.value = totalLiquid
+                } else if (currentItemId !== ItemId.QUANTITY) {
                     totalLiquid = water
-                    totalLiquidEditText.value = water
+                    totalLiquidItem.value = water
                 }
             }
 
@@ -198,53 +198,53 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
             } else {
                 water / concentrate
             }
-            concentrateEditText.value = concentrate
-            dilutionRatioEditText.value = dilutionRatio
+            concentrateItem.value = concentrate
+            dilutionRatioItem.value = dilutionRatio
         } else if (getEnabledForPosition(totalLiquidIndex) && getEnabledForPosition(concentrateIndex)) {
             if (totalLiquid - concentrate < 0) {
-                if (currentEditText !== ItemId.QUANTITY) {
+                if (currentItemId !== ItemId.QUANTITY) {
                     totalLiquid = concentrate
-                    totalLiquidEditText.value = concentrate
-                } else if (currentEditText !== ItemId.CONCENTRATE) {
+                    totalLiquidItem.value = concentrate
+                } else if (currentItemId !== ItemId.CONCENTRATE) {
                     concentrate = totalLiquid
-                    concentrateEditText.value = totalLiquid
+                    concentrateItem.value = totalLiquid
                 }
             }
 
             water = totalLiquid - concentrate
             dilutionRatio = if (totalLiquid == 0.0 && concentrate == 0.0) 0.0 else totalLiquid / concentrate - 1
-            waterEditText.value = water
-            dilutionRatioEditText.value = dilutionRatio
+            waterItem.value = water
+            dilutionRatioItem.value = dilutionRatio
         } else if (getEnabledForPosition(dilutionRatioIndex) && getEnabledForPosition(waterIndex)) {
             if (dilutionRatio == 0.0) {
-                if (currentEditText !== ItemId.WATER) {
+                if (currentItemId !== ItemId.WATER) {
                     water = 0.0
-                    waterEditText.value = water
+                    waterItem.value = water
                     concentrate = totalLiquid
-                    concentrateEditText.value = totalLiquid
-                } else if (currentEditText !== ItemId.DILUTION) {
+                    concentrateItem.value = totalLiquid
+                } else if (currentItemId !== ItemId.DILUTION) {
                     water = 0.0
-                    waterEditText.value = water
+                    waterItem.value = water
                     //waterEditText.selectAll() TODO
                     //flashView(dilutionRatioEditText) TODO
                 }
             } else {
                 totalLiquid = (water / dilutionRatio) + water
                 concentrate = totalLiquid - water
-                totalLiquidEditText.value = totalLiquid
-                concentrateEditText.value = concentrate
+                totalLiquidItem.value = totalLiquid
+                concentrateItem.value = concentrate
             }
         } else if (getEnabledForPosition(dilutionRatioIndex) && getEnabledForPosition(concentrateIndex)) {
-            if (dilutionRatio == Double.POSITIVE_INFINITY && currentEditText !== ItemId.DILUTION) {
+            if (dilutionRatio == Double.POSITIVE_INFINITY && currentItemId !== ItemId.DILUTION) {
                 concentrate = 0.0
-                concentrateEditText.value = concentrate
+                concentrateItem.value = concentrate
                 //concentrateEditText.selectAll() TODO
                 //flashView(dilutionRatioEditText) TODO
             } else {
                 totalLiquid = concentrate * (dilutionRatio + 1)
                 water = totalLiquid - concentrate
-                totalLiquidEditText.value = totalLiquid
-                waterEditText.value = water
+                totalLiquidItem.value = totalLiquid
+                waterItem.value = water
             }
         } else if (getEnabledForPosition(concentrateIndex) && getEnabledForPosition(waterIndex)) {
             totalLiquid = concentrate + water
@@ -254,8 +254,8 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
                 dilutionRatio = 0.0
             }
 
-            totalLiquidEditText.value = totalLiquid
-            dilutionRatioEditText.value = dilutionRatio
+            totalLiquidItem.value = totalLiquid
+            dilutionRatioItem.value = dilutionRatio
         }
 
         // TODO
@@ -272,5 +272,13 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         animation.duration = 500 // Durata di ogni ciclo
         animation.repeatCount = 1
         animation.start()
+    }
+
+    private fun getDoubleValue(editText: EditText): Double {
+        var value = editText.text.toString().toDoubleOrNull() ?: 0.0
+        if (editText.text.toString().trim() == "∞") {
+            value = Double.POSITIVE_INFINITY
+        }
+        return value;
     }
 }
