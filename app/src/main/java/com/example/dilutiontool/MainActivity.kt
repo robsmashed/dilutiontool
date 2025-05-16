@@ -1,14 +1,17 @@
 package com.example.dilutiontool
 
-import android.content.Context
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
 import android.text.SpannableString
 import android.text.Spanned
+import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.view.View
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -18,9 +21,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.core.view.children
 import com.bumptech.glide.Glide
 import com.example.dilutiontool.DilutionUtils.getDescription
 import com.example.dilutiontool.entity.Dilution
@@ -29,19 +30,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.Locale
 import kotlin.math.roundToInt
 
-data class Item(
-    val id: ItemId,
-    val label: String,
-    val valueSuffix: String,
-    var value: Double = 0.0,
-)
-
-enum class ItemId {
-    QUANTITY,
-    DILUTION,
-    WATER,
-    CONCENTRATE
-}
 class MainActivity : AppCompatActivity() {
     private var selectedProductWithDilutions: ProductWithDilutions? = null
     private var selectedProductDilution: Dilution? = null
@@ -58,20 +46,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var discardProductSelectionFab: FloatingActionButton
     private lateinit var selectedProductContainer: LinearLayout
     private lateinit var noSelectedProductLabel: TextView
-    private lateinit var recycler: RecyclerView
-    private val items = mutableListOf(
-        Item(ItemId.QUANTITY, "Quantità totale", "ml"),
-        Item(ItemId.DILUTION, "Rapporto di diluizione", ":1"),
-        Item(ItemId.WATER, "Quantità di acqua", "ml"),
-        Item(ItemId.CONCENTRATE, "Quantità di prodotto", "ml"),
-    )
-    private lateinit var draggableAdapter: DraggableAdapter
-
-    class NoScrollLinearLayoutManager(context: Context) : LinearLayoutManager(context) {
-        override fun canScrollVertically(): Boolean {
-            return false // Disabilita lo scroll verticale
-        }
-    }
+    var isProgrammaticChange = false // Flag per sapere se il cambiamento è programmatico
 
     private val productSelectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -188,10 +163,127 @@ class MainActivity : AppCompatActivity() {
     }
     */
 
+    private fun limitDecimalInput(editText: EditText) {
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(charSequence: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(editable: Editable?) {
+                val text = editable.toString()
+                if (text.contains(".")) {
+                    val parts = text.split(".")
+                    if (parts.size == 2 && parts[1].length > 2) {
+                        val newText = parts[0] + "." + parts[1].substring(0, 2)
+                        editText.setText(newText)
+                        editText.setSelection(newText.length)
+                    }
+                }
+            }
+        })
+    }
+
+    private fun calculateResult(currentEditText: EditText) {
+        var totalLiquid = getDoubleValue(totalLiquidEditText)
+        var dilutionRatio = getDoubleValue(dilutionRatioEditText)
+        var water = getDoubleValue(waterEditText)
+        var concentrate = getDoubleValue(concentrateEditText)
+
+        if (totalLiquidEditText.isEnabled && dilutionRatioEditText.isEnabled) {
+            concentrate = totalLiquid / (dilutionRatio + 1)
+            water = totalLiquid - concentrate
+            changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
+            changeTextProgrammatically(waterEditText, getStringValue(water))
+        } else if (totalLiquidEditText.isEnabled && waterEditText.isEnabled) {
+            if (totalLiquid - water < 0) {
+                if (currentEditText !== waterEditText) {
+                    water = totalLiquid
+                    changeTextProgrammatically(waterEditText, getStringValue(totalLiquid))
+                } else if (currentEditText !== totalLiquidEditText) {
+                    totalLiquid = water
+                    changeTextProgrammatically(totalLiquidEditText, getStringValue(water))
+                }
+            }
+
+            concentrate = totalLiquid - water
+
+            dilutionRatio = if (concentrate == totalLiquid) {
+                0.0
+            } else if (concentrate == 0.0) {
+                Double.POSITIVE_INFINITY
+            } else {
+                water / concentrate
+            }
+            changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
+            changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
+        } else if (totalLiquidEditText.isEnabled && concentrateEditText.isEnabled) {
+            if (totalLiquid - concentrate < 0) {
+                if (currentEditText !== totalLiquidEditText) {
+                    totalLiquid = concentrate
+                    changeTextProgrammatically(totalLiquidEditText, getStringValue(concentrate))
+                } else if (currentEditText !== concentrateEditText) {
+                    concentrate = totalLiquid
+                    changeTextProgrammatically(concentrateEditText, getStringValue(totalLiquid))
+                }
+            }
+
+            water = totalLiquid - concentrate
+            dilutionRatio = if (totalLiquid == 0.0 && concentrate == 0.0) 0.0 else totalLiquid / concentrate - 1
+            changeTextProgrammatically(waterEditText, getStringValue(water))
+            changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
+        } else if (dilutionRatioEditText.isEnabled && waterEditText.isEnabled) {
+            if (dilutionRatio == 0.0) {
+                if (currentEditText !== waterEditText) {
+                    water = 0.0
+                    changeTextProgrammatically(waterEditText, getStringValue(water))
+                    concentrate = totalLiquid;
+                    changeTextProgrammatically(concentrateEditText, getStringValue(totalLiquid))
+                } else if (currentEditText !== dilutionRatioEditText) {
+                    water = 0.0
+                    changeTextProgrammatically(waterEditText, getStringValue(water))
+                    waterEditText.selectAll()
+                    flashView(dilutionRatioEditText)
+                }
+            } else {
+                totalLiquid = (water / dilutionRatio) + water
+                concentrate = totalLiquid - water
+                changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
+                changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
+            }
+        } else if (dilutionRatioEditText.isEnabled && concentrateEditText.isEnabled) {
+            if (dilutionRatio == Double.POSITIVE_INFINITY && currentEditText !== dilutionRatioEditText) {
+                concentrate = 0.0
+                changeTextProgrammatically(concentrateEditText, getStringValue(concentrate))
+                concentrateEditText.selectAll()
+                flashView(dilutionRatioEditText)
+            } else {
+                totalLiquid = concentrate * (dilutionRatio + 1)
+                water = totalLiquid - concentrate
+                changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
+                changeTextProgrammatically(waterEditText, getStringValue(water))
+            }
+        } else if (concentrateEditText.isEnabled && waterEditText.isEnabled) {
+            totalLiquid = concentrate + water
+            dilutionRatio = water / concentrate
+
+            if (dilutionRatio.isNaN()) {
+                dilutionRatio = 0.0
+            }
+
+            changeTextProgrammatically(totalLiquidEditText, getStringValue(totalLiquid))
+            changeTextProgrammatically(dilutionRatioEditText, getStringValue(dilutionRatio))
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        dilutionRatioEditText = findViewById(R.id.dilutionRatioEditText)
+        totalLiquidEditText = findViewById(R.id.totalEditText)
+        concentrateEditText = findViewById(R.id.concentrateEditText)
+        waterEditText = findViewById(R.id.waterEditText)
         productContainer = findViewById(R.id.productContainer)
         selectedProductNameTextView = findViewById(R.id.selectedProductName)
         selectedProductDescriptionTextView = findViewById(R.id.selectedProductDescription)
@@ -201,45 +293,62 @@ class MainActivity : AppCompatActivity() {
         selectedProductContainer = findViewById(R.id.selectedProductContainer)
         noSelectedProductLabel = findViewById(R.id.noSelectedProductLabel)
         discardProductSelectionFab = findViewById(R.id.discardProductSelectionFab)
-
-        recycler = findViewById(R.id.recyclerTop)
-        draggableAdapter = DraggableAdapter(items) // Inizializza l'adapter
-        val callbackTop = DragManageAdapter(draggableAdapter, items) // Crea un callback per il touch helper
-        val itemTouchHelper = ItemTouchHelper(callbackTop) // Inizializza l'ItemTouchHelper
-        draggableAdapter.setTouchHelper(itemTouchHelper) // Associa l'ItemTouchHelper all'adapter
-        draggableAdapter.onDilutionRatioChange = { editText ->
-            // update seekbar
-            if (selectedProductDilution != null) {
-                val currentDilutionValue = getDoubleValue(editText)
-                val progress = selectedProductDilution!!.value - currentDilutionValue.toInt()
-
-                if (currentDilutionValue == Double.POSITIVE_INFINITY || progress < 0) {
-                    seekBar.progress = 0
-                } else if (progress > seekBar.max) {
-                    seekBar.progress = seekBar.max
-                } else {
-                    seekBar.progress = progress
-                }
-            }
-        }
-        draggableAdapter.enableProductSelection = { enable ->
-            productContainer.alpha = if (enable) 1.0f else 0.5f // Imposta l'alpha per dare l'effetto di disabilitazione
-            selectedProductContainer.isClickable = enable
-            noSelectedProductLabel.isClickable = enable
-            selectedProductLinkTextView.movementMethod = if (enable) LinkMovementMethod.getInstance() else null
-            seekBar.isEnabled = enable
-        }
-        recycler.apply { // Imposta l'adapter al RecyclerView e il layout manager
-            layoutManager = NoScrollLinearLayoutManager(this@MainActivity)
-            adapter = draggableAdapter
-        }
-        itemTouchHelper.attachToRecyclerView(recycler) // Attacca l'ItemTouchHelper al RecyclerView
-
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        val totalLiquidLockCheckBox = findViewById<CheckBox>(R.id.totalLiquidLockCheckBox)
+        val dilutionRatioLockCheckBox = findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox)
+        val waterResultTextLockCheckBox = findViewById<CheckBox>(R.id.waterResultTextLockCheckBox)
+        val resultTextLockCheckBox = findViewById<CheckBox>(R.id.resultTextLockCheckBox)
 
         discardProductSelectionFab.setOnClickListener {
             discardCurrentProductSelection()
+        }
+
+        limitDecimalInput(dilutionRatioEditText)
+        limitDecimalInput(totalLiquidEditText)
+        limitDecimalInput(concentrateEditText)
+        limitDecimalInput(waterEditText)
+
+        val checkBoxEditTextMap = mapOf(
+            totalLiquidLockCheckBox to totalLiquidEditText,
+            dilutionRatioLockCheckBox to dilutionRatioEditText,
+            waterResultTextLockCheckBox to waterEditText,
+            resultTextLockCheckBox to concentrateEditText
+        )
+        checkBoxEditTextMap.keys.forEach { checkBox ->
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                if (checkBoxEditTextMap.keys.count { it.isChecked } >= 2) {
+                    for ((otherCheckBox, otherEditText) in checkBoxEditTextMap) {
+                        if (otherCheckBox.isChecked) {
+                            otherEditText.isEnabled = isChecked // Imposta isEnabled dell'EditText in base allo stato della checkBox
+                        } else {
+                            otherCheckBox.isEnabled = false // Disabilita le altre CheckBox non selezionate
+                        }
+                    }
+                    enableProductSelection(findViewById<CheckBox>(R.id.dilutionRatioLockCheckBox).isChecked)
+                } else {
+                    for ((otherCheckBox, otherEditText) in checkBoxEditTextMap) {
+                        otherEditText.isEnabled = false // Disabilita tutti i campi di testo
+                        otherCheckBox.isEnabled = true // Riabilita tutte le checkbox
+                    }
+                    enableProductSelection(false)
+                }
+            }
+        }
+
+        // Allow checkbox check/uncheck by clicking on titles
+        listOf(
+            findViewById<LinearLayout>(R.id.totalLiquidLockCheckBoxContainer),
+            findViewById<LinearLayout>(R.id.dilutionRatioLockCheckBoxContainer),
+            findViewById<LinearLayout>(R.id.waterResultTextLockCheckBoxContainer),
+            findViewById<LinearLayout>(R.id.resultTextLockCheckBoxContainer)
+        ).forEach { container ->
+            container.setOnClickListener {
+                val checkBox = container.children.filterIsInstance<CheckBox>().firstOrNull() // Trova la prima CheckBox figlia nel LinearLayout
+                checkBox?.let {
+                    if (checkBox.isEnabled) {
+                        checkBox.isChecked = !checkBox.isChecked
+                    }
+                }
+            }
         }
 
         val launchProductList = View.OnClickListener {
@@ -247,6 +356,32 @@ class MainActivity : AppCompatActivity() {
         }
         selectedProductContainer.setOnClickListener(launchProductList)
         noSelectedProductLabel.setOnClickListener(launchProductList)
+
+        setTextInputBehaviour(dilutionRatioEditText)
+        setTextInputBehaviour(waterEditText)
+        setTextInputBehaviour(concentrateEditText)
+        setTextInputBehaviour(totalLiquidEditText)
+
+        calculateResult(totalLiquidEditText) // inizializzazione a partire dai due valori iniziali
+    }
+
+    private fun setTextInputBehaviour(editText: EditText) {
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                updateSeekbar(editText)
+                if (!isProgrammaticChange) {
+                    calculateResult(editText)
+                }
+                updateDilutionRangeWarning()
+            }
+        })
+        editText.setSelectAllOnFocus(true);
+        editText.setOnClickListener {
+            editText.clearFocus()
+            editText.requestFocus()
+        }
     }
 
     private fun updateDilutionRangeWarning() {
@@ -257,6 +392,21 @@ class MainActivity : AppCompatActivity() {
         } else {
             dilutionRatioEditText.error = null
         }
+    }
+
+    private fun enableProductSelection(enable: Boolean) {
+        productContainer.alpha = if (enable) 1.0f else 0.5f // Imposta l'alpha per dare l'effetto di disabilitazione
+        findViewById<LinearLayout>(R.id.selectedProductContainer).isClickable = enable
+        findViewById<TextView>(R.id.noSelectedProductLabel).isClickable = enable
+        selectedProductLinkTextView.movementMethod = if (enable) LinkMovementMethod.getInstance() else null
+        seekBar.isEnabled = enable
+    }
+
+    private fun flashView(view: View) {
+        val animation = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f, 1f)
+        animation.duration = 500 // Durata di ogni ciclo
+        animation.repeatCount = 1
+        animation.start()
     }
 
     private fun getStringValue(value: Double): String {
@@ -281,5 +431,26 @@ class MainActivity : AppCompatActivity() {
             value = Double.POSITIVE_INFINITY
         }
         return value;
+    }
+
+    private fun changeTextProgrammatically(editText: EditText, newText: String) {
+        isProgrammaticChange = true
+        editText.setText(newText)
+        isProgrammaticChange = false
+    }
+
+    private fun updateSeekbar(editText: EditText) {
+        if (editText === dilutionRatioEditText && selectedProductDilution != null) {
+            val currentDilutionValue = getDoubleValue(editText)
+            val progress = selectedProductDilution!!.value - currentDilutionValue.toInt()
+
+            if (currentDilutionValue == Double.POSITIVE_INFINITY || progress < 0) {
+                seekBar.progress = 0
+            } else if (progress > seekBar.max) {
+                seekBar.progress = seekBar.max
+            } else {
+                seekBar.progress = progress
+            }
+        }
     }
 }
