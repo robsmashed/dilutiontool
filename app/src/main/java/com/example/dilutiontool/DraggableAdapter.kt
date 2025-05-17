@@ -200,7 +200,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
                 if (currentItemId !== ItemId.WATER) {
                     water = totalLiquid
                     waterItem.value = totalLiquid
-                } else if (currentItemId !== ItemId.QUANTITY) {
+                } else if (currentItemId !== ItemId.QUANTITY) { // TODO
                     totalLiquid = water
                     totalLiquidItem.value = water
                 }
@@ -222,7 +222,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
                 if (currentItemId !== ItemId.QUANTITY) {
                     totalLiquid = concentrate
                     totalLiquidItem.value = concentrate
-                } else if (currentItemId !== ItemId.CONCENTRATE) {
+                } else if (currentItemId !== ItemId.CONCENTRATE) { // TODO
                     concentrate = totalLiquid
                     concentrateItem.value = totalLiquid
                 }
@@ -239,7 +239,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
                     waterItem.value = water
                     concentrate = totalLiquid
                     concentrateItem.value = totalLiquid
-                } else if (currentItemId !== ItemId.DILUTION) {
+                } else if (currentItemId !== ItemId.DILUTION) { // TODO
                     water = 0.0
                     waterItem.value = water
                     //waterEditText.selectAll() TODO

@@ -46,10 +46,6 @@ enum class ItemId {
 class MainActivity : AppCompatActivity() {
     private var selectedProductWithDilutions: ProductWithDilutions? = null
     private var selectedProductDilution: Dilution? = null
-    private lateinit var dilutionRatioEditText: EditText
-    private lateinit var totalLiquidEditText: EditText
-    private lateinit var concentrateEditText: EditText
-    private lateinit var waterEditText: EditText
     private lateinit var productContainer: LinearLayout
     private lateinit var selectedProductNameTextView: TextView
     private lateinit var selectedProductDescriptionTextView: TextView
@@ -81,17 +77,13 @@ class MainActivity : AppCompatActivity() {
             val selectedDilution = result.data?.getParcelableExtra<Dilution>("selectedDilution")
             val selectedProductWithDilutions = result.data?.getParcelableExtra<ProductWithDilutions>("selectedProductWithDilutions")
             setSelectedProduct(selectedProductWithDilutions, selectedDilution)
-
-            dilutionRatioEditText.clearFocus()
-            totalLiquidEditText.clearFocus()
-            concentrateEditText.clearFocus()
-            waterEditText.clearFocus()
         }
     }
 
     private fun setSelectedProduct(selectedProductWithDilutions: ProductWithDilutions?, selectedDilution: Dilution?) {
         if (selectedProductWithDilutions != null && selectedDilution != null) {
-            var currentDilutionValue = getDoubleValue(dilutionRatioEditText) // current dilution value in input text
+            val item = items.find { it.id == ItemId.DILUTION }
+            var currentDilutionValue = item!!.value // current dilution value in input text
             if ( // check if same product & current dilution is in dilution range
                 selectedProductWithDilutions.product.id != this.selectedProductWithDilutions?.product?.id ||
                 (currentDilutionValue < selectedDilution.minValue || currentDilutionValue > selectedDilution.value)
@@ -103,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             discardProductSelectionFab.visibility = View.VISIBLE
             selectedProductDilution = selectedDilution
             this.selectedProductWithDilutions = selectedProductWithDilutions
-            dilutionRatioEditText.setText(getStringValue(currentDilutionValue))
+            item.value = currentDilutionValue
             selectedProductNameTextView.text = selectedProductWithDilutions.product.name
             selectedProductDescriptionTextView.text = getDescription(selectedDilution)
 
@@ -139,7 +131,8 @@ class MainActivity : AppCompatActivity() {
                 seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                         if (fromUser) {
-                            dilutionRatioEditText.setText(getStringValue((selectedDilution.value - progress).toDouble()))
+                            item.value = (selectedDilution.value - progress).toDouble()
+                            draggableAdapter.notifyDataSetChanged() // TODO
                         }
                     }
                     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -151,7 +144,8 @@ class MainActivity : AppCompatActivity() {
 
             selectedProductContainer.visibility = View.VISIBLE
             noSelectedProductLabel.visibility = View.GONE
-            updateDilutionRangeWarning()
+            //updateDilutionRangeWarning() TODO
+            draggableAdapter.notifyDataSetChanged() // TODO
         } else {
             discardCurrentProductSelection()
         }
@@ -159,7 +153,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun discardCurrentProductSelection() {
         selectedProductDilution = null
-        updateDilutionRangeWarning()
+        //updateDilutionRangeWarning() TODO
         discardProductSelectionFab.visibility = View.GONE
         selectedProductContainer.visibility = View.GONE
         noSelectedProductLabel.visibility = View.VISIBLE
@@ -250,6 +244,7 @@ class MainActivity : AppCompatActivity() {
         noSelectedProductLabel.setOnClickListener(launchProductList)
     }
 
+    /* TODO
     private fun updateDilutionRangeWarning() {
         if (selectedProductDilution != null && (selectedProductDilution!!.minValue > getDoubleValue(dilutionRatioEditText) || selectedProductDilution!!.value < getDoubleValue(dilutionRatioEditText))) {
             val warningIcon = ContextCompat.getDrawable(this, R.drawable.baseline_warning_24)
@@ -259,6 +254,7 @@ class MainActivity : AppCompatActivity() {
             dilutionRatioEditText.error = null
         }
     }
+    */
 
     private fun getStringValue(value: Double): String {
         return when (value) {
