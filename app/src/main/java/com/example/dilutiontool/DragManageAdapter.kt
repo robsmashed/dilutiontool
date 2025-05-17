@@ -28,7 +28,8 @@ class DragManageAdapter(
             val vh = recyclerView.findViewHolderForAdapterPosition(i)
             if (vh is DraggableAdapter.ViewHolder) {
                 vh.phase.text = adapter.getPhaseLabelForPosition(i)
-                vh.valueEditText.isEnabled = adapter.getEnabledForPosition(i)
+                vh.valueEditText.visibility = adapter.getEditVisibilityForPosition(i)
+                vh.valueTextView.visibility = adapter.getReadVisibilityForPosition(i)
             }
         }
 

@@ -35,10 +35,13 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         holder.title.text = currentItem.label
         holder.valueSuffix.text = currentItem.valueSuffix
         holder.phase.text = getPhaseLabelForPosition(position)
-        holder.valueEditText.isEnabled = getEnabledForPosition(position)
+        holder.valueEditText.visibility = getEditVisibilityForPosition(position)
+        holder.valueTextView.visibility = getReadVisibilityForPosition(position)
         if (currentItem.id === ItemId.DILUTION) {
             enableProductSelection?.invoke(getEnabledForPosition(position))
         }
+
+        holder.valueTextView.text = getStringValue(currentItem.value)
 
         holder.valueEditText.removeTextChangedListener(holder.textWatcher)
         holder.valueEditText.setText(getStringValue(currentItem.value))
@@ -64,12 +67,20 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         }
     }
 
-    fun getEnabledForPosition(position: Int): Boolean {
+    private fun getEnabledForPosition(position: Int): Boolean {
         return when (position) {
             0 -> true
             1 -> true
             else -> false
         }
+    }
+
+    fun getEditVisibilityForPosition(position: Int): Int {
+        return if (getEnabledForPosition(position)) View.VISIBLE else View.GONE
+    }
+
+    fun getReadVisibilityForPosition(position: Int): Int {
+        return if (!getEnabledForPosition(position)) View.VISIBLE else View.GONE
     }
 
     override fun getItemCount(): Int = items.size
@@ -86,6 +97,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         val valueSuffix: TextView = itemView.findViewById(R.id.valueSuffix)
         val phase: TextView = itemView.findViewById(R.id.phase)
         val valueEditText: EditText = itemView.findViewById(R.id.valueEditText)
+        val valueTextView: TextView = itemView.findViewById(R.id.valueTextView)
         val textWatcher = object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 if (items[bindingAdapterPosition].id === ItemId.DILUTION) {
@@ -94,6 +106,9 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
 
                 val item = items[bindingAdapterPosition]
                 item.value = getDoubleValue(valueEditText)
+
+                valueTextView.text = valueEditText.text
+
                 calculateResult(item.id)
                 // updateDilutionRangeWarning() TODO
             }
