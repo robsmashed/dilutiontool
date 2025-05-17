@@ -16,8 +16,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:background="@android:color/white"
@@ -28,14 +27,14 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerTop"
+                android:layout_marginTop="10dp"
+                android:minHeight="514dp"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_height="wrap_content"/>
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp">
+                android:layout_height="wrap_content">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/discardProductSelectionFab"
@@ -48,13 +47,10 @@
                     app:fabCustomSize="35dp" />
 
                 <LinearLayout
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp"
-                    android:paddingBottom="15dp"
+                    android:padding="15dp"
                     android:id="@+id/productContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
                     android:orientation="vertical">
 
                     <TextView
