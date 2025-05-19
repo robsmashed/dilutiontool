@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
                     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                         if (fromUser) {
                             item.value = (selectedDilution.value - progress).toDouble()
-                            draggableAdapter.notifyDataSetChanged() // TODO
+                            draggableAdapter.calculateResult(ItemId.DILUTION, true)
                         }
                     }
                     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -144,8 +144,7 @@ class MainActivity : AppCompatActivity() {
 
             selectedProductContainer.visibility = View.VISIBLE
             noSelectedProductLabel.visibility = View.GONE
-            //updateDilutionRangeWarning() TODO
-            draggableAdapter.notifyDataSetChanged() // TODO
+            draggableAdapter.calculateResult(ItemId.DILUTION, true)
         } else {
             discardCurrentProductSelection()
         }

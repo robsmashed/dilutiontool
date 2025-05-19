@@ -100,17 +100,16 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         val valueTextView: TextView = itemView.findViewById(R.id.valueTextView)
         val textWatcher = object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                if (items[bindingAdapterPosition].id === ItemId.DILUTION) {
+                val item = items[bindingAdapterPosition]
+
+                if (item.id === ItemId.DILUTION) {
                     onDilutionRatioChange?.invoke(valueEditText)
                 }
 
-                val item = items[bindingAdapterPosition]
                 item.value = getDoubleValue(valueEditText)
-
                 valueTextView.text = valueEditText.text
 
                 calculateResult(item.id)
-                // updateDilutionRangeWarning() TODO
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -174,7 +173,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         }
     }
 
-    private fun calculateResult(currentItemId: ItemId) {
+    fun calculateResult(currentItemId: ItemId, notifyDataSetChanged: Boolean = false) {
         val totalLiquidIndex = items.indexOfFirst { it.id == ItemId.QUANTITY }
         val dilutionRatioIndex = items.indexOfFirst { it.id == ItemId.DILUTION }
         val waterIndex = items.indexOfFirst { it.id == ItemId.WATER }
@@ -275,19 +274,24 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
             dilutionRatioItem.value = dilutionRatio
         }
 
-        // Update everything but changed value
-        if (ItemId.QUANTITY !== currentItemId) {
-            notifyItemChanged(totalLiquidIndex)
+        if (notifyDataSetChanged) {
+            notifyDataSetChanged()
+        } else {
+            // Update everything but changed value
+            if (ItemId.QUANTITY !== currentItemId) {
+                notifyItemChanged(totalLiquidIndex)
+            }
+            if (ItemId.DILUTION !== currentItemId) {
+                notifyItemChanged(dilutionRatioIndex)
+            }
+            if (ItemId.WATER !== currentItemId) {
+                notifyItemChanged(waterIndex)
+            }
+            if (ItemId.CONCENTRATE !== currentItemId) {
+                notifyItemChanged(concentrateIndex)
+            }
         }
-        if (ItemId.DILUTION !== currentItemId) {
-            notifyItemChanged(dilutionRatioIndex)
-        }
-        if (ItemId.WATER !== currentItemId) {
-            notifyItemChanged(waterIndex)
-        }
-        if (ItemId.CONCENTRATE !== currentItemId) {
-            notifyItemChanged(concentrateIndex)
-        }
+        // updateDilutionRangeWarning() TODO
     }
 
     private fun flashView(view: View) {
