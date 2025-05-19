@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 class DragManageAdapter(
     private val adapter: DraggableAdapter,
     private val sourceList: MutableList<Item>,
+    private val onDraggingChange: ((Boolean) -> Unit)? = null
 ) : ItemTouchHelper.Callback() {
 
     override fun getMovementFlags(
@@ -32,6 +33,8 @@ class DragManageAdapter(
                 vh.valueTextView.visibility = adapter.getReadVisibilityForPosition(i)
             }
         }
+
+        onDraggingChange?.invoke(adapter.getEnabledForPosition(sourceList.indexOfFirst { it.id == ItemId.DILUTION }))
 
         return true
     }

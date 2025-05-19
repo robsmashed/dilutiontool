@@ -18,7 +18,6 @@ import java.util.Locale
 
 class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adapter<DraggableAdapter.ViewHolder>() {
     var onDilutionRatioChange: ((EditText) -> Unit)? = null
-    var enableProductSelection: ((Boolean) -> Unit)? = null
     private var touchHelper: ItemTouchHelper? = null
 
     fun setTouchHelper(helper: ItemTouchHelper) {
@@ -37,9 +36,6 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         holder.phase.text = getPhaseLabelForPosition(position)
         holder.valueEditText.visibility = getEditVisibilityForPosition(position)
         holder.valueTextView.visibility = getReadVisibilityForPosition(position)
-        if (currentItem.id === ItemId.DILUTION) {
-            enableProductSelection?.invoke(getEnabledForPosition(position))
-        }
 
         holder.valueTextView.text = getStringValue(currentItem.value)
 
@@ -67,7 +63,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         }
     }
 
-    private fun getEnabledForPosition(position: Int): Boolean {
+    fun getEnabledForPosition(position: Int): Boolean {
         return when (position) {
             0 -> true
             1 -> true

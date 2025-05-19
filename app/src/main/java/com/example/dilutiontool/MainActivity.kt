@@ -198,8 +198,13 @@ class MainActivity : AppCompatActivity() {
 
         recycler = findViewById(R.id.recyclerTop)
         draggableAdapter = DraggableAdapter(items) // Inizializza l'adapter
-        val callbackTop = DragManageAdapter(draggableAdapter, items) // Crea un callback per il touch helper
-        val itemTouchHelper = ItemTouchHelper(callbackTop) // Inizializza l'ItemTouchHelper
+        val itemTouchHelper = ItemTouchHelper(DragManageAdapter(draggableAdapter, items) { enable ->
+            productContainer.alpha = if (enable) 1.0f else 0.5f // Imposta l'alpha per dare l'effetto di disabilitazione
+            selectedProductContainer.isClickable = enable
+            noSelectedProductLabel.isClickable = enable
+            selectedProductLinkTextView.movementMethod = if (enable) LinkMovementMethod.getInstance() else null
+            seekBar.isEnabled = enable
+        }) // Inizializza l'ItemTouchHelper
         draggableAdapter.setTouchHelper(itemTouchHelper) // Associa l'ItemTouchHelper all'adapter
         draggableAdapter.onDilutionRatioChange = { editText ->
             // update seekbar
@@ -215,13 +220,6 @@ class MainActivity : AppCompatActivity() {
                     seekBar.progress = progress
                 }
             }
-        }
-        draggableAdapter.enableProductSelection = { enable ->
-            productContainer.alpha = if (enable) 1.0f else 0.5f // Imposta l'alpha per dare l'effetto di disabilitazione
-            selectedProductContainer.isClickable = enable
-            noSelectedProductLabel.isClickable = enable
-            selectedProductLinkTextView.movementMethod = if (enable) LinkMovementMethod.getInstance() else null
-            seekBar.isEnabled = enable
         }
         recycler.apply { // Imposta l'adapter al RecyclerView e il layout manager
             layoutManager = NoScrollLinearLayoutManager(this@MainActivity)
