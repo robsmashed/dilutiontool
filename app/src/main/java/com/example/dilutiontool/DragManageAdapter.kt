@@ -34,7 +34,7 @@ class DragManageAdapter(
             }
         }
 
-        onDraggingChange?.invoke(adapter.getEnabledForPosition(sourceList.indexOfFirst { it.id == ItemId.DILUTION }))
+        onDraggingChange?.invoke(adapter.getIsEnabledForPosition(sourceList.indexOfFirst { it.id == ItemId.DILUTION }))
 
         return true
     }

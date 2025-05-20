@@ -15,7 +15,9 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Locale
 
-class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adapter<DraggableAdapter.ViewHolder>() {
+class DraggableAdapter(
+    private val items: MutableList<Item>
+) : RecyclerView.Adapter<DraggableAdapter.ViewHolder>() {
     var onDilutionRatioChange: ((EditText) -> Unit)? = null
     var touchHelper: ItemTouchHelper? = null
 
@@ -58,7 +60,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         }
     }
 
-    fun getEnabledForPosition(position: Int): Boolean {
+    fun getIsEnabledForPosition(position: Int): Boolean {
         return when (position) {
             0 -> true
             1 -> true
@@ -66,12 +68,16 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         }
     }
 
+    fun getIsEnabled(item: Item): Boolean {
+        return getIsEnabledForPosition(items.indexOfFirst { it.id == item.id })
+    }
+
     fun getEditVisibilityForPosition(position: Int): Int {
-        return if (getEnabledForPosition(position)) View.VISIBLE else View.GONE
+        return if (getIsEnabledForPosition(position)) View.VISIBLE else View.GONE
     }
 
     fun getReadVisibilityForPosition(position: Int): Int {
-        return if (!getEnabledForPosition(position)) View.VISIBLE else View.GONE
+        return if (!getIsEnabledForPosition(position)) View.VISIBLE else View.GONE
     }
 
     override fun getItemCount(): Int = items.size
@@ -164,7 +170,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         }
     }
 
-    fun calculateResult(currentItemId: ItemId, notifyDataSetChanged: Boolean = false) {
+    fun calculateResult(currentItemId: ItemId, customValue: Double? = null) {
         val totalLiquidIndex = items.indexOfFirst { it.id == ItemId.QUANTITY }
         val dilutionRatioIndex = items.indexOfFirst { it.id == ItemId.DILUTION }
         val waterIndex = items.indexOfFirst { it.id == ItemId.WATER }
@@ -175,10 +181,14 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         val water = items[waterIndex]
         val concentrate = items[concentrateIndex]
 
-        if (getEnabledForPosition(totalLiquidIndex) && getEnabledForPosition(dilutionRatioIndex)) {
+        if (customValue !== null) {
+            items.find { it.id == currentItemId }?.value = customValue
+        }
+
+        if (getIsEnabledForPosition(totalLiquidIndex) && getIsEnabledForPosition(dilutionRatioIndex)) {
             concentrate.value = totalLiquid.value / (dilutionRatio.value + 1)
             water.value = totalLiquid.value - concentrate.value
-        } else if (getEnabledForPosition(totalLiquidIndex) && getEnabledForPosition(waterIndex)) {
+        } else if (getIsEnabledForPosition(totalLiquidIndex) && getIsEnabledForPosition(waterIndex)) {
             if (totalLiquid.value < water.value) {
                 if (currentItemId === ItemId.WATER) {
                     totalLiquid.value = water.value
@@ -196,7 +206,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
             } else {
                 water.value / concentrate.value
             }
-        } else if (getEnabledForPosition(totalLiquidIndex) && getEnabledForPosition(concentrateIndex)) {
+        } else if (getIsEnabledForPosition(totalLiquidIndex) && getIsEnabledForPosition(concentrateIndex)) {
             if (totalLiquid.value < concentrate.value) {
                 if (currentItemId === ItemId.QUANTITY) {
                     concentrate.value = totalLiquid.value
@@ -208,7 +218,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
 
             water.value = totalLiquid.value - concentrate.value
             dilutionRatio.value = if (totalLiquid.value == 0.0 && concentrate.value == 0.0) 0.0 else totalLiquid.value / concentrate.value - 1
-        } else if (getEnabledForPosition(dilutionRatioIndex) && getEnabledForPosition(waterIndex)) {
+        } else if (getIsEnabledForPosition(dilutionRatioIndex) && getIsEnabledForPosition(waterIndex)) {
             if (dilutionRatio.value == 0.0) {
                 if (currentItemId === ItemId.WATER) {
                     water.value = 0.0
@@ -222,7 +232,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
                 totalLiquid.value = (water.value / dilutionRatio.value) + water.value
                 concentrate.value = totalLiquid.value - water.value
             }
-        } else if (getEnabledForPosition(dilutionRatioIndex) && getEnabledForPosition(concentrateIndex)) {
+        } else if (getIsEnabledForPosition(dilutionRatioIndex) && getIsEnabledForPosition(concentrateIndex)) {
             if (currentItemId === ItemId.CONCENTRATE && dilutionRatio.value == Double.POSITIVE_INFINITY) {
                 concentrate.value = 0.0
                 notifyItemChanged(concentrateIndex) // force update yourself
@@ -231,14 +241,14 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
                 totalLiquid.value = concentrate.value * (dilutionRatio.value + 1)
                 water.value = totalLiquid.value - concentrate.value
             }
-        } else if (getEnabledForPosition(concentrateIndex) && getEnabledForPosition(waterIndex)) {
+        } else if (getIsEnabledForPosition(concentrateIndex) && getIsEnabledForPosition(waterIndex)) {
             totalLiquid.value = concentrate.value + water.value
             val currentDilutionRatio = water.value / concentrate.value
             dilutionRatio.value = if (currentDilutionRatio.isNaN()) 0.0 else currentDilutionRatio
         }
 
-        if (notifyDataSetChanged) {
-            notifyDataSetChanged()
+        if (customValue !== null) {
+            notifyDataSetChanged() // Update changed value and everything else
         } else {
             // Update everything but changed value
             if (ItemId.QUANTITY !== currentItemId) {

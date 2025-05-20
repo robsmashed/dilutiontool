@@ -95,7 +95,6 @@ class MainActivity : AppCompatActivity() {
             discardProductSelectionFab.visibility = View.VISIBLE
             selectedProductDilution = selectedDilution
             this.selectedProductWithDilutions = selectedProductWithDilutions
-            item.value = currentDilutionValue
             selectedProductNameTextView.text = selectedProductWithDilutions.product.name
             selectedProductDescriptionTextView.text = getDescription(selectedDilution)
 
@@ -131,8 +130,7 @@ class MainActivity : AppCompatActivity() {
                 seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                         if (fromUser) {
-                            item.value = (selectedDilution.value - progress).toDouble()
-                            draggableAdapter.calculateResult(ItemId.DILUTION, true)
+                            draggableAdapter.calculateResult(ItemId.DILUTION, (selectedDilution.value - progress).toDouble())
                         }
                     }
                     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -144,7 +142,7 @@ class MainActivity : AppCompatActivity() {
 
             selectedProductContainer.visibility = View.VISIBLE
             noSelectedProductLabel.visibility = View.GONE
-            draggableAdapter.calculateResult(ItemId.DILUTION, true)
+            draggableAdapter.calculateResult(ItemId.DILUTION, currentDilutionValue)
         } else {
             discardCurrentProductSelection()
         }
