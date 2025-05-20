@@ -191,13 +191,14 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
             concentrateItem.value = concentrate
             waterItem.value = water
         } else if (getEnabledForPosition(totalLiquidIndex) && getEnabledForPosition(waterIndex)) {
-            if (totalLiquid - water < 0) {
-                if (currentItemId !== ItemId.WATER) {
-                    water = totalLiquid
-                    waterItem.value = totalLiquid
-                } else if (currentItemId !== ItemId.QUANTITY) { // TODO
+            if (totalLiquid < water) {
+                if (currentItemId === ItemId.WATER) {
                     totalLiquid = water
-                    totalLiquidItem.value = water
+                    totalLiquidItem.value = totalLiquid
+                } else if (currentItemId === ItemId.QUANTITY) {
+                    water = totalLiquid
+                    waterItem.value = water
+                    // TODO keep updating water?
                 }
             }
 
@@ -213,13 +214,14 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
             concentrateItem.value = concentrate
             dilutionRatioItem.value = dilutionRatio
         } else if (getEnabledForPosition(totalLiquidIndex) && getEnabledForPosition(concentrateIndex)) {
-            if (totalLiquid - concentrate < 0) {
-                if (currentItemId !== ItemId.QUANTITY) {
-                    totalLiquid = concentrate
-                    totalLiquidItem.value = concentrate
-                } else if (currentItemId !== ItemId.CONCENTRATE) { // TODO
+            if (totalLiquid < concentrate) {
+                if (currentItemId === ItemId.QUANTITY) {
                     concentrate = totalLiquid
-                    concentrateItem.value = totalLiquid
+                    concentrateItem.value = concentrate
+                    // TODO keep updating concentrate?
+                } else if (currentItemId === ItemId.CONCENTRATE) {
+                    totalLiquid = concentrate
+                    totalLiquidItem.value = totalLiquid
                 }
             }
 
@@ -229,16 +231,17 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
             dilutionRatioItem.value = dilutionRatio
         } else if (getEnabledForPosition(dilutionRatioIndex) && getEnabledForPosition(waterIndex)) {
             if (dilutionRatio == 0.0) {
-                if (currentItemId !== ItemId.WATER) {
+                if (currentItemId === ItemId.WATER) {
+                    water = 0.0
+                    waterItem.value = water
+                    notifyItemChanged(waterIndex)
+                    //flashView(dilutionRatioEditText) TODO
+                } else if (currentItemId === ItemId.DILUTION) {
                     water = 0.0
                     waterItem.value = water
                     concentrate = totalLiquid
-                    concentrateItem.value = totalLiquid
-                } else if (currentItemId !== ItemId.DILUTION) { // TODO
-                    water = 0.0
-                    waterItem.value = water
-                    //waterEditText.selectAll() TODO
-                    //flashView(dilutionRatioEditText) TODO
+                    concentrateItem.value = concentrate
+                    notifyItemChanged(concentrateIndex)
                 }
             } else {
                 totalLiquid = (water / dilutionRatio) + water
@@ -247,10 +250,10 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
                 concentrateItem.value = concentrate
             }
         } else if (getEnabledForPosition(dilutionRatioIndex) && getEnabledForPosition(concentrateIndex)) {
-            if (dilutionRatio == Double.POSITIVE_INFINITY && currentItemId !== ItemId.DILUTION) {
+            if (currentItemId === ItemId.CONCENTRATE && dilutionRatio == Double.POSITIVE_INFINITY) {
                 concentrate = 0.0
                 concentrateItem.value = concentrate
-                //concentrateEditText.selectAll() TODO
+                notifyItemChanged(concentrateIndex)
                 //flashView(dilutionRatioEditText) TODO
             } else {
                 totalLiquid = concentrate * (dilutionRatio + 1)
@@ -262,12 +265,8 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
             totalLiquid = concentrate + water
             dilutionRatio = water / concentrate
 
-            if (dilutionRatio.isNaN()) {
-                dilutionRatio = 0.0
-            }
-
             totalLiquidItem.value = totalLiquid
-            dilutionRatioItem.value = dilutionRatio
+            dilutionRatioItem.value = if (dilutionRatio.isNaN()) 0.0 else dilutionRatio
         }
 
         if (notifyDataSetChanged) {
