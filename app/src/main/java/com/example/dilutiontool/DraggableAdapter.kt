@@ -1,6 +1,5 @@
 package com.example.dilutiontool
 
-import android.animation.ObjectAnimator
 import android.graphics.drawable.LayerDrawable
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,11 +17,7 @@ import java.util.Locale
 
 class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adapter<DraggableAdapter.ViewHolder>() {
     var onDilutionRatioChange: ((EditText) -> Unit)? = null
-    private var touchHelper: ItemTouchHelper? = null
-
-    fun setTouchHelper(helper: ItemTouchHelper) {
-        touchHelper = helper
-    }
+    var touchHelper: ItemTouchHelper? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_row, parent, false)
@@ -218,7 +213,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
                 if (currentItemId === ItemId.WATER) {
                     water.value = 0.0
                     notifyItemChanged(waterIndex) // force update yourself
-                    //flashView(dilutionRatioEditText) TODO
+                    // TODO avvisare l'utente che la quantità d'acqua rimane 0 a causa del rapporto di diluzione 0
                 } else if (currentItemId === ItemId.DILUTION) {
                     water.value = 0.0
                     concentrate.value = totalLiquid.value
@@ -231,7 +226,7 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
             if (currentItemId === ItemId.CONCENTRATE && dilutionRatio.value == Double.POSITIVE_INFINITY) {
                 concentrate.value = 0.0
                 notifyItemChanged(concentrateIndex) // force update yourself
-                //flashView(dilutionRatioEditText) TODO
+                // TODO avvisare l'utente che la quantità di concentrato rimane 0 a causa del rapporto di diluzione infinito
             } else {
                 totalLiquid.value = concentrate.value * (dilutionRatio.value + 1)
                 water.value = totalLiquid.value - concentrate.value
@@ -260,13 +255,6 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
             }
         }
         // updateDilutionRangeWarning() TODO
-    }
-
-    private fun flashView(view: View) {
-        val animation = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f, 1f)
-        animation.duration = 500 // Durata di ogni ciclo
-        animation.repeatCount = 1
-        animation.start()
     }
 
     private fun getDoubleValue(editText: EditText): Double {

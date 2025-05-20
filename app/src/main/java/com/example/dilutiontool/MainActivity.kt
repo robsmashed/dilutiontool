@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity() {
             selectedProductLinkTextView.movementMethod = if (enable) LinkMovementMethod.getInstance() else null
             seekBar.isEnabled = enable
         }) // Inizializza l'ItemTouchHelper
-        draggableAdapter.setTouchHelper(itemTouchHelper) // Associa l'ItemTouchHelper all'adapter
+        draggableAdapter.touchHelper = itemTouchHelper // Associa l'ItemTouchHelper all'adapter
         draggableAdapter.onDilutionRatioChange = { editText ->
             // update seekbar
             if (selectedProductDilution != null) {
