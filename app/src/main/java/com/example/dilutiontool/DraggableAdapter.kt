@@ -175,98 +175,71 @@ class DraggableAdapter(private val items: MutableList<Item>) : RecyclerView.Adap
         val waterIndex = items.indexOfFirst { it.id == ItemId.WATER }
         val concentrateIndex = items.indexOfFirst { it.id == ItemId.CONCENTRATE }
 
-        val totalLiquidItem = items[totalLiquidIndex]
-        val dilutionRatioItem = items[dilutionRatioIndex]
-        val waterItem = items[waterIndex]
-        val concentrateItem = items[concentrateIndex]
-
-        var totalLiquid = totalLiquidItem.value
-        var dilutionRatio = dilutionRatioItem.value
-        var water = waterItem.value
-        var concentrate = concentrateItem.value
+        val totalLiquid = items[totalLiquidIndex]
+        val dilutionRatio = items[dilutionRatioIndex]
+        val water = items[waterIndex]
+        val concentrate = items[concentrateIndex]
 
         if (getEnabledForPosition(totalLiquidIndex) && getEnabledForPosition(dilutionRatioIndex)) {
-            concentrate = totalLiquid / (dilutionRatio + 1)
-            water = totalLiquid - concentrate
-            concentrateItem.value = concentrate
-            waterItem.value = water
+            concentrate.value = totalLiquid.value / (dilutionRatio.value + 1)
+            water.value = totalLiquid.value - concentrate.value
         } else if (getEnabledForPosition(totalLiquidIndex) && getEnabledForPosition(waterIndex)) {
-            if (totalLiquid < water) {
+            if (totalLiquid.value < water.value) {
                 if (currentItemId === ItemId.WATER) {
-                    totalLiquid = water
-                    totalLiquidItem.value = totalLiquid
+                    totalLiquid.value = water.value
                 } else if (currentItemId === ItemId.QUANTITY) {
-                    water = totalLiquid
-                    waterItem.value = water
+                    water.value = totalLiquid.value
                     // TODO keep updating water?
                 }
             }
 
-            concentrate = totalLiquid - water
-
-            dilutionRatio = if (concentrate == totalLiquid) {
+            concentrate.value = totalLiquid.value - water.value
+            dilutionRatio.value = if (concentrate.value == totalLiquid.value) {
                 0.0
-            } else if (concentrate == 0.0) {
+            } else if (concentrate.value == 0.0) {
                 Double.POSITIVE_INFINITY
             } else {
-                water / concentrate
+                water.value / concentrate.value
             }
-            concentrateItem.value = concentrate
-            dilutionRatioItem.value = dilutionRatio
         } else if (getEnabledForPosition(totalLiquidIndex) && getEnabledForPosition(concentrateIndex)) {
-            if (totalLiquid < concentrate) {
+            if (totalLiquid.value < concentrate.value) {
                 if (currentItemId === ItemId.QUANTITY) {
-                    concentrate = totalLiquid
-                    concentrateItem.value = concentrate
+                    concentrate.value = totalLiquid.value
                     // TODO keep updating concentrate?
                 } else if (currentItemId === ItemId.CONCENTRATE) {
-                    totalLiquid = concentrate
-                    totalLiquidItem.value = totalLiquid
+                    totalLiquid.value = concentrate.value
                 }
             }
 
-            water = totalLiquid - concentrate
-            dilutionRatio = if (totalLiquid == 0.0 && concentrate == 0.0) 0.0 else totalLiquid / concentrate - 1
-            waterItem.value = water
-            dilutionRatioItem.value = dilutionRatio
+            water.value = totalLiquid.value - concentrate.value
+            dilutionRatio.value = if (totalLiquid.value == 0.0 && concentrate.value == 0.0) 0.0 else totalLiquid.value / concentrate.value - 1
         } else if (getEnabledForPosition(dilutionRatioIndex) && getEnabledForPosition(waterIndex)) {
-            if (dilutionRatio == 0.0) {
+            if (dilutionRatio.value == 0.0) {
                 if (currentItemId === ItemId.WATER) {
-                    water = 0.0
-                    waterItem.value = water
-                    notifyItemChanged(waterIndex)
+                    water.value = 0.0
+                    notifyItemChanged(waterIndex) // force update yourself
                     //flashView(dilutionRatioEditText) TODO
                 } else if (currentItemId === ItemId.DILUTION) {
-                    water = 0.0
-                    waterItem.value = water
-                    concentrate = totalLiquid
-                    concentrateItem.value = concentrate
-                    notifyItemChanged(concentrateIndex)
+                    water.value = 0.0
+                    concentrate.value = totalLiquid.value
                 }
             } else {
-                totalLiquid = (water / dilutionRatio) + water
-                concentrate = totalLiquid - water
-                totalLiquidItem.value = totalLiquid
-                concentrateItem.value = concentrate
+                totalLiquid.value = (water.value / dilutionRatio.value) + water.value
+                concentrate.value = totalLiquid.value - water.value
             }
         } else if (getEnabledForPosition(dilutionRatioIndex) && getEnabledForPosition(concentrateIndex)) {
-            if (currentItemId === ItemId.CONCENTRATE && dilutionRatio == Double.POSITIVE_INFINITY) {
-                concentrate = 0.0
-                concentrateItem.value = concentrate
-                notifyItemChanged(concentrateIndex)
+            if (currentItemId === ItemId.CONCENTRATE && dilutionRatio.value == Double.POSITIVE_INFINITY) {
+                concentrate.value = 0.0
+                notifyItemChanged(concentrateIndex) // force update yourself
                 //flashView(dilutionRatioEditText) TODO
             } else {
-                totalLiquid = concentrate * (dilutionRatio + 1)
-                water = totalLiquid - concentrate
-                totalLiquidItem.value = totalLiquid
-                waterItem.value = water
+                totalLiquid.value = concentrate.value * (dilutionRatio.value + 1)
+                water.value = totalLiquid.value - concentrate.value
             }
         } else if (getEnabledForPosition(concentrateIndex) && getEnabledForPosition(waterIndex)) {
-            totalLiquid = concentrate + water
-            dilutionRatio = water / concentrate
-
-            totalLiquidItem.value = totalLiquid
-            dilutionRatioItem.value = if (dilutionRatio.isNaN()) 0.0 else dilutionRatio
+            totalLiquid.value = concentrate.value + water.value
+            val currentDilutionRatio = water.value / concentrate.value
+            dilutionRatio.value = if (currentDilutionRatio.isNaN()) 0.0 else currentDilutionRatio
         }
 
         if (notifyDataSetChanged) {
