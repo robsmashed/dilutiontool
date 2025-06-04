@@ -140,7 +140,7 @@ class ProductAddActivity : AppCompatActivity() {
             builder.show()
         }
 
-        val productWithDilutions = getCurrentProductWithDilutions()
+        val productWithDilutions = getInitialProductWithDilutions()
         if (productWithDilutions != null) {
             productWithDilutions.let {
                 productNameInput.setText(it.product.name)
@@ -162,60 +162,65 @@ class ProductAddActivity : AppCompatActivity() {
         }
 
         saveProductButton.setOnClickListener {
-            val product = Product(
-                id = productWithDilutions?.product?.id ?: 0,
-                name = productNameInput.text.toString(),
-                description = productDescriptionInput.text.toString(),
-                image = imageBytes,
-                link = productLinkInput.text.toString()
-            )
+            val currentProductWithDilutions = getCurrentProductWithDilutions(productWithDilutions?.product?.id)
 
-            val dilutions = mutableListOf<Dilution>()
-
-            for (i in 0 until dilutionGroups.childCount) {
-                val dilutionGroup = dilutionGroups.getChildAt(i) as LinearLayout
-                val dilutionGroupName = dilutionGroup.findViewById<EditText>(R.id.dilutionGroupNameEditText).text.toString()
-                val dilutionListLayout = dilutionGroup.findViewById<LinearLayout>(R.id.dilutionListLayout)
-
-                for (j in 0 until dilutionListLayout.childCount) {
-                    val dilutionRow = dilutionListLayout.getChildAt(j)
-                    val dilutionId = dilutionRow.tag as String?
-
-                    var dilutionValue = dilutionRow.findViewById<EditText>(R.id.dilutionInput).text.toString().toIntOrNull()
-                    var dilutionMinValue = dilutionRow.findViewById<EditText>(R.id.minDilutionInput).text.toString().toIntOrNull()
-                    if (dilutionValue != null || dilutionMinValue != null) {
-                        if (dilutionValue != null && dilutionMinValue != null && dilutionMinValue > dilutionValue) {
-                            dilutionValue = dilutionMinValue.also { dilutionMinValue = dilutionValue }
-                        }
-                        val dilution = Dilution(
-                            productId = 0, // Lo inseriamo poi in fase di saveProductWithDilutions
-                            description = dilutionRow.findViewById<EditText>(R.id.dilutionDescriptionInput).text.toString(),
-                            value = dilutionValue ?: dilutionMinValue ?: 0,
-                            minValue = dilutionMinValue ?: dilutionValue ?: 0,
-                            mode = dilutionGroupName.ifEmpty { null },
-                        )
-                        dilutions.add(if (dilutionId !== null) dilution.copy(id = dilutionId.toLong()) else dilution)
-                    }
-                }
-            }
-
-            if (product.name.isEmpty() && dilutions.isEmpty()) {
+            if (currentProductWithDilutions.product.name.isEmpty() && currentProductWithDilutions.dilutions.isEmpty()) {
                 Toast.makeText(this, "Inserisci un nome e almeno una diluizione valida", Toast.LENGTH_SHORT).show()
-            } else if (product.name.isEmpty()) {
+            } else if (currentProductWithDilutions.product.name.isEmpty()) {
                 Toast.makeText(this, "Inserisci un nome valido", Toast.LENGTH_SHORT).show()
-            } else if (dilutions.isEmpty()) {
+            } else if (currentProductWithDilutions.dilutions.isEmpty()) {
                 Toast.makeText(this, "Inserisci almeno una diluizione valida", Toast.LENGTH_SHORT).show()
             } else {
-                saveProductWithDilutions(ProductWithDilutions(
-                    product = product,
-                    dilutions = dilutions
-                ))
+                saveProductWithDilutions(currentProductWithDilutions)
             }
         }
     }
 
-    private fun getCurrentProductWithDilutions(): ProductWithDilutions? {
-        return intent.getParcelableExtra<ProductWithDilutions>("PRODUCT_WITH_DILUTIONS")
+    private fun getCurrentProductWithDilutions(initialProductWithDilutionsId: Long?): ProductWithDilutions {
+        val product = Product(
+            id = initialProductWithDilutionsId ?: 0,
+            name = productNameInput.text.toString(),
+            description = productDescriptionInput.text.toString(),
+            image = imageBytes,
+            link = productLinkInput.text.toString()
+        )
+
+        val dilutions = mutableListOf<Dilution>()
+        for (i in 0 until dilutionGroups.childCount) {
+            val dilutionGroup = dilutionGroups.getChildAt(i) as LinearLayout
+            val dilutionGroupName = dilutionGroup.findViewById<EditText>(R.id.dilutionGroupNameEditText).text.toString()
+            val dilutionListLayout = dilutionGroup.findViewById<LinearLayout>(R.id.dilutionListLayout)
+
+            for (j in 0 until dilutionListLayout.childCount) {
+                val dilutionRow = dilutionListLayout.getChildAt(j)
+                val dilutionId = dilutionRow.tag as String?
+
+                var dilutionValue = dilutionRow.findViewById<EditText>(R.id.dilutionInput).text.toString().toIntOrNull()
+                var dilutionMinValue = dilutionRow.findViewById<EditText>(R.id.minDilutionInput).text.toString().toIntOrNull()
+                if (dilutionValue != null || dilutionMinValue != null) {
+                    if (dilutionValue != null && dilutionMinValue != null && dilutionMinValue > dilutionValue) {
+                        dilutionValue = dilutionMinValue.also { dilutionMinValue = dilutionValue }
+                    }
+                    val dilution = Dilution(
+                        productId = 0, // Lo inseriamo poi in fase di saveProductWithDilutions
+                        description = dilutionRow.findViewById<EditText>(R.id.dilutionDescriptionInput).text.toString(),
+                        value = dilutionValue ?: dilutionMinValue ?: 0,
+                        minValue = dilutionMinValue ?: dilutionValue ?: 0,
+                        mode = dilutionGroupName.ifEmpty { null },
+                    )
+                    dilutions.add(if (dilutionId !== null) dilution.copy(id = dilutionId.toLong()) else dilution)
+                }
+            }
+        }
+
+        return ProductWithDilutions(
+            product = product,
+            dilutions = dilutions
+        )
+    }
+
+    private fun getInitialProductWithDilutions(): ProductWithDilutions? {
+        return intent.getParcelableExtra("PRODUCT_WITH_DILUTIONS")
     }
 
     private fun saveProductWithDilutions(productWithDilutions: ProductWithDilutions) {
@@ -236,7 +241,7 @@ class ProductAddActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     val resultIntent = Intent()
-                    resultIntent.putExtra("isAdd", getCurrentProductWithDilutions() === null)
+                    resultIntent.putExtra("isAdd", getInitialProductWithDilutions() === null)
                     setResult(RESULT_OK, resultIntent)  // Imposta il risultato
                     finish()
                 }
@@ -285,5 +290,10 @@ class ProductAddActivity : AppCompatActivity() {
         }
 
         dilutionListLayout.addView(newDilutionRow)
+    }
+
+    override fun onBackPressed() {
+        // TODO check if any field is modified
+        super.onBackPressed()
     }
 }
