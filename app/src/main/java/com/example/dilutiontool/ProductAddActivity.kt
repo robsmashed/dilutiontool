@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.dilutiontool.data.database.AppDatabase
@@ -36,6 +37,8 @@ class ProductAddActivity : AppCompatActivity() {
     private lateinit var addDilutionGroupButton: Button
     private lateinit var saveProductButton: Button
     private lateinit var productImageView: ImageView
+    private var initialProductWithDilutions: ProductWithDilutions? = null
+    private var currentProductId: Long = 0
     private var imageBytes: ByteArray? = null
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -140,14 +143,13 @@ class ProductAddActivity : AppCompatActivity() {
             builder.show()
         }
 
-        val productWithDilutions = getInitialProductWithDilutions()
+        val productWithDilutions = getProductWithDilutionsToEdit()
         if (productWithDilutions != null) {
-            productWithDilutions.let {
-                productNameInput.setText(it.product.name)
-                productDescriptionInput.setText(it.product.description)
-                productLinkInput.setText(it.product.link)
-                setImage(it.product.image)
-            }
+            currentProductId = productWithDilutions.product.id
+            productNameInput.setText(productWithDilutions.product.name)
+            productDescriptionInput.setText(productWithDilutions.product.description)
+            productLinkInput.setText(productWithDilutions.product.link)
+            setImage(productWithDilutions.product.image)
 
             val groupedByMode: Map<String, List<Dilution>> = productWithDilutions.dilutions.groupBy { it.mode ?: "" }
             groupedByMode.forEach { (mode, dilutionList) ->
@@ -161,8 +163,10 @@ class ProductAddActivity : AppCompatActivity() {
             addDilutionGroup()
         }
 
+        initialProductWithDilutions = getCurrentProductWithDilutions()
+
         saveProductButton.setOnClickListener {
-            val currentProductWithDilutions = getCurrentProductWithDilutions(productWithDilutions?.product?.id)
+            val currentProductWithDilutions = getCurrentProductWithDilutions()
 
             if (currentProductWithDilutions.product.name.isEmpty() && currentProductWithDilutions.dilutions.isEmpty()) {
                 Toast.makeText(this, "Inserisci un nome e almeno una diluizione valida", Toast.LENGTH_SHORT).show()
@@ -174,11 +178,29 @@ class ProductAddActivity : AppCompatActivity() {
                 saveProductWithDilutions(currentProductWithDilutions)
             }
         }
+
+        onBackPressedDispatcher.addCallback(this) {
+            if (initialProductWithDilutions == getCurrentProductWithDilutions()) {
+                finish()
+            } else {
+                AlertDialog.Builder(this@ProductAddActivity)
+                    .setTitle("Modifiche non salvate")
+                    .setMessage("Ci sono modifiche non salvate, vuoi scartare le modifiche?")
+                    .setPositiveButton("Scarta") { dialog, _ ->
+                        dialog.dismiss()
+                        finish()
+                    }
+                    .setNegativeButton("Annulla") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
+            }
+        }
     }
 
-    private fun getCurrentProductWithDilutions(initialProductWithDilutionsId: Long?): ProductWithDilutions {
+    private fun getCurrentProductWithDilutions(): ProductWithDilutions {
         val product = Product(
-            id = initialProductWithDilutionsId ?: 0,
+            id = currentProductId,
             name = productNameInput.text.toString(),
             description = productDescriptionInput.text.toString(),
             image = imageBytes,
@@ -219,7 +241,7 @@ class ProductAddActivity : AppCompatActivity() {
         )
     }
 
-    private fun getInitialProductWithDilutions(): ProductWithDilutions? {
+    private fun getProductWithDilutionsToEdit(): ProductWithDilutions? {
         return intent.getParcelableExtra("PRODUCT_WITH_DILUTIONS")
     }
 
@@ -241,7 +263,7 @@ class ProductAddActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     val resultIntent = Intent()
-                    resultIntent.putExtra("isAdd", getInitialProductWithDilutions() === null)
+                    resultIntent.putExtra("isAdd", getProductWithDilutionsToEdit() === null)
                     setResult(RESULT_OK, resultIntent)  // Imposta il risultato
                     finish()
                 }
@@ -290,10 +312,5 @@ class ProductAddActivity : AppCompatActivity() {
         }
 
         dilutionListLayout.addView(newDilutionRow)
-    }
-
-    override fun onBackPressed() {
-        // TODO check if any field is modified
-        super.onBackPressed()
     }
 }

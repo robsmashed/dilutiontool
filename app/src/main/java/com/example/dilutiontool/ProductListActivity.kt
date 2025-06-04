@@ -15,6 +15,7 @@ import android.widget.SearchView
 import android.widget.SimpleExpandableListAdapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -226,6 +227,18 @@ class ProductListActivity : AppCompatActivity() {
 
         db = getDatabase(this)
         fetchProducts()
+
+        onBackPressedDispatcher.addCallback(this) {
+            if (selectedProducts.isNotEmpty()) {
+                updateSelectedProducts(emptyList())
+                fetchProducts()
+            } else {
+                val foundProduct: ProductWithDilutions? = products.find { it.product.id == selectedProductWithDilutions?.product?.id }
+                val foundDilution = foundProduct?.dilutions?.find { it.id == selectedDilution?.id }
+                setResultIntent(foundDilution, foundProduct)
+                finish()
+            }
+        }
     }
 
     private fun addProduct(productWithDilutions: ProductWithDilutions? = null) {
@@ -299,18 +312,6 @@ class ProductListActivity : AppCompatActivity() {
     ) {
         setResultIntent(selectedDilution, selectedProductWithDilutions)
         finish()
-    }
-
-    override fun onBackPressed() {
-        if (selectedProducts.isNotEmpty()) {
-            updateSelectedProducts(emptyList())
-            fetchProducts()
-        } else {
-            val foundProduct: ProductWithDilutions? = products.find { it.product.id == selectedProductWithDilutions?.product?.id }
-            val foundDilution = foundProduct?.dilutions?.find { it.id == selectedDilution?.id }
-            setResultIntent(foundDilution, foundProduct)
-            super.onBackPressed()
-        }
     }
 
     private fun setResultIntent(
