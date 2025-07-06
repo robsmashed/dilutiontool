@@ -204,10 +204,9 @@ class MainActivity : AppCompatActivity() {
             seekBar.isEnabled = enable
         }) // Inizializza l'ItemTouchHelper
         draggableAdapter.touchHelper = itemTouchHelper // Associa l'ItemTouchHelper all'adapter
-        draggableAdapter.onDilutionRatioChange = { editText ->
+        draggableAdapter.onDilutionRatioChange = { currentDilutionValue ->
             // update seekbar
             if (selectedProductDilution != null) {
-                val currentDilutionValue = getDoubleValue(editText)
                 val progress = selectedProductDilution!!.value - currentDilutionValue.toInt()
 
                 if (currentDilutionValue == Double.POSITIVE_INFINITY || progress < 0) {

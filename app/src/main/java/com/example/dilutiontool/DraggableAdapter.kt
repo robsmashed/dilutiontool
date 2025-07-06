@@ -18,7 +18,7 @@ import java.util.Locale
 class DraggableAdapter(
     private val items: MutableList<Item>
 ) : RecyclerView.Adapter<DraggableAdapter.ViewHolder>() {
-    var onDilutionRatioChange: ((EditText) -> Unit)? = null
+    var onDilutionRatioChange: ((Double) -> Unit)? = null
     var touchHelper: ItemTouchHelper? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -99,14 +99,16 @@ class DraggableAdapter(
             override fun afterTextChanged(s: Editable?) {
                 val item = items[bindingAdapterPosition]
 
-                if (item.id === ItemId.DILUTION) {
-                    onDilutionRatioChange?.invoke(valueEditText)
-                }
-
                 item.value = getDoubleValue(valueEditText)
                 valueTextView.text = valueEditText.text
 
                 calculateResult(item.id)
+
+                // Always update seekbar with current dilution value
+                val dilutionItem = items.find { it.id == ItemId.DILUTION }
+                if (dilutionItem != null) {
+                    onDilutionRatioChange?.invoke(dilutionItem.value)
+                }
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
