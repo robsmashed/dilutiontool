@@ -57,16 +57,19 @@ object ProductDialogUtils {
             expandableListView.setAdapter(expandableListAdapter)
             if (categories.size == 1) expandableListView.expandGroup(0)
 
-            expandableListView.setOnChildClickListener { _, _, groupPos, childPos, _ ->
-                onDilutionSelected(items[groupPos][childPos])
-                true
-            }
-
-            AlertDialog.Builder(context)
+            val alertDialog = AlertDialog.Builder(context)
                 .setTitle("Diluizioni per ${productWithDilutions.product.name}")
                 .setView(expandableListView)
                 .setNegativeButton("Annulla", null)
-                .show()
+                .create()
+
+            expandableListView.setOnChildClickListener { _, _, groupPos, childPos, _ ->
+                onDilutionSelected(items[groupPos][childPos])
+                alertDialog.dismiss()
+                true
+            }
+
+            alertDialog.show()
         }
     }
 }

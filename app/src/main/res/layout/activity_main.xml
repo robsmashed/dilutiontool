@@ -112,7 +112,7 @@
                                     android:ellipsize="end"
                                     android:maxLines="2"
                                     android:padding="4dp"
-                                    android:background="#FFFFFF"
+                                    android:background="#D9BBFF"
                                     android:text="Product Description"
                                     android:textSize="14sp" />
 
