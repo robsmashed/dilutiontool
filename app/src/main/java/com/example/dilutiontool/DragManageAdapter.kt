@@ -39,7 +39,7 @@ class DragManageAdapter(
         return true
     }
 
-    override fun isLongPressDragEnabled(): Boolean = false
+    override fun isLongPressDragEnabled(): Boolean = true
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
 
