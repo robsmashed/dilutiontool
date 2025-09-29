@@ -37,6 +37,10 @@ class ProductAdapter(
         notifyDataSetChanged()
     }
 
+    fun isSelectionModeActive(): Boolean {
+        return isSelectionMode
+    }
+
     fun setSelectionMode(enabled: Boolean) {
         isSelectionMode = enabled
         if (!enabled) selectedItems.clear()  // Reset selezione se disabilitato
@@ -135,14 +139,7 @@ class ProductAdapter(
             } else {
                 selectedItems.add(product)
             }
-
             notifyItemChanged(adapterPosition)
-
-            // Se nessun elemento è selezionato, esci dalla modalità selezione
-            if (selectedItems.isEmpty()) {
-                setSelectionMode(false)
-            }
-
             onSelectionChange(selectedItems) // Notifica l'Activity
         }
     }

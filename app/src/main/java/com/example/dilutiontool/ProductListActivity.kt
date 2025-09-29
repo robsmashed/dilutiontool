@@ -229,7 +229,9 @@ class ProductListActivity : AppCompatActivity() {
         fetchProducts()
 
         onBackPressedDispatcher.addCallback(this) {
-            if (selectedProducts.isNotEmpty()) {
+            val adapter = productRecyclerView.adapter as ProductAdapter
+            if (adapter.isSelectionModeActive()) {
+                adapter.setSelectionMode(false) // resetti la modalità selezione
                 updateSelectedProducts(emptyList())
                 fetchProducts()
             } else {
@@ -284,8 +286,15 @@ class ProductListActivity : AppCompatActivity() {
 
     private fun updateSelectedProducts(selectedProducts: List<ProductWithDilutions>) {
         this.selectedProducts = selectedProducts
-        fabAddProduct.visibility = if (this.selectedProducts.isNotEmpty()) View.GONE else View.VISIBLE
-        fabDeleteProduct.visibility = if (this.selectedProducts.isNotEmpty()) View.VISIBLE else View.GONE
+
+        val adapter = productRecyclerView.adapter as ProductAdapter
+        if (adapter.isSelectionModeActive()) {
+            fabAddProduct.visibility = View.GONE
+            fabDeleteProduct.visibility = if (this.selectedProducts.isNotEmpty()) View.VISIBLE else View.GONE
+        } else {
+            fabAddProduct.visibility = View.VISIBLE
+            fabDeleteProduct.visibility = View.GONE
+        }
     }
 
     private fun deleteProducts(productsWithDilutions: List<ProductWithDilutions>) {
