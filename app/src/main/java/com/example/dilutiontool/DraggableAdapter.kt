@@ -130,11 +130,7 @@ class DraggableAdapter(
             limitDecimalInput(valueEditText)
             valueEditText.addTextChangedListener(textWatcher)
 
-            valueEditText.setSelectAllOnFocus(true);
-            valueEditText.setOnClickListener {
-                valueEditText.clearFocus()
-                valueEditText.requestFocus()
-            }
+            valueEditText.setSelectAllOnFocus(true)
         }
     }
 
