@@ -17,7 +17,6 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -96,7 +95,15 @@ class MainActivity : AppCompatActivity() {
             selectedProductDilution = selectedDilution
             this.selectedProductWithDilutions = selectedProductWithDilutions
             selectedProductNameTextView.text = selectedProductWithDilutions.product.name
+
             selectedProductDescriptionTextView.text = getDescription(selectedDilution)
+            selectedProductDescriptionTextView.setOnClickListener {
+                selectedProductWithDilutions.let { product ->
+                    ProductDialogUtils.showDilutionDialog(this, product) { dilution ->
+                        setSelectedProduct(product, dilution)
+                    }
+                }
+            }
 
             val spannableString = SpannableString("Link prodotto")
             val clickableSpan = object : ClickableSpan() {

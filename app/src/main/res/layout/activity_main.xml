@@ -111,6 +111,8 @@
                                     android:layout_marginTop="8dp"
                                     android:ellipsize="end"
                                     android:maxLines="2"
+                                    android:padding="4dp"
+                                    android:background="#FFFFFF"
                                     android:text="Product Description"
                                     android:textSize="14sp" />
 

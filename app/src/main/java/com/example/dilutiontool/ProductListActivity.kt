@@ -9,10 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.ArrayAdapter
-import android.widget.ExpandableListView
 import android.widget.SearchView
-import android.widget.SimpleExpandableListAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
@@ -22,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.dilutiontool.DilutionUtils.getDescription
 import com.example.dilutiontool.data.database.AppDatabase
 import com.example.dilutiontool.data.database.AppDatabase.Companion.getDatabase
 import com.example.dilutiontool.entity.Dilution
@@ -270,11 +266,9 @@ class ProductListActivity : AppCompatActivity() {
                     this@ProductListActivity,
                     filteredProducts,
                     { selectedProduct ->
-                        // TODO use only one dynamic dialog
-                        if (selectedProduct.dilutions.all { it.mode == null })
-                            showDilutionSelectionDialog(selectedProduct)
-                        else
-                            showDialogWithCategorizedItems(selectedProduct)
+                        ProductDialogUtils.showDilutionDialog(this, selectedProduct) { dilution ->
+                            setSelectedProductWithDilution(dilution, selectedProduct)
+                        }
                     },
                     { selectedProducts -> updateSelectedProducts(selectedProducts.toList()) },
                     { productToDelete -> onDeleteProductsClick(listOf(productToDelete)) },
@@ -338,78 +332,5 @@ class ProductListActivity : AppCompatActivity() {
             putExtra("selectedProductWithDilutions", product)
         }
         setResult(RESULT_OK, resultIntent)
-    }
-
-    private fun showDilutionSelectionDialog(productWithDilutions: ProductWithDilutions) {
-        val sortedDilutions = productWithDilutions.dilutions.sortedBy { it.minValue }
-        val context = this
-
-        val adapter = ArrayAdapter(
-            context,
-            R.layout.dialog_list_item,
-            sortedDilutions.map { getDescription(it) }
-        )
-
-        AlertDialog.Builder(context)
-            .setTitle("Diluizioni per ${productWithDilutions.product.name}")
-            .setNegativeButton("Annulla", null)
-            .setAdapter(adapter) { _, which ->
-                setSelectedProductWithDilution(
-                    sortedDilutions[which],
-                    productWithDilutions
-                )
-            }
-            .show()
-    }
-
-
-    fun showDialogWithCategorizedItems(productWithDilutions: ProductWithDilutions) {
-        val sortedDilutions = productWithDilutions.dilutions.sortedBy { it.minValue }
-        val categories = sortedDilutions.map { it.mode }.distinct()
-        val items = sortedDilutions.groupBy { it.mode }.values.toList()
-
-        // Crea una lista di mappe per la struttura dei dati
-        val groupData = categories.map { mapOf("CATEGORY" to (it ?: "Categoria non definita")) }
-        val childData = items.map { it.map { item -> mapOf("ITEM" to getDescription(item)) } }
-
-        // Crea un SimpleExpandableListAdapter
-        val expandableListAdapter = SimpleExpandableListAdapter(
-            this,
-            groupData,
-            android.R.layout.simple_expandable_list_item_1,
-            arrayOf("CATEGORY"),
-            intArrayOf(android.R.id.text1),
-            childData,
-            R.layout.dialog_list_item,
-            arrayOf("ITEM"),
-            intArrayOf(android.R.id.text1)
-        )
-
-        // Crea l'ExpandableListView
-        val expandableListView = ExpandableListView(this)
-        expandableListView.setAdapter(expandableListAdapter)
-
-        // Espandi la categoria se unica
-        if (categories.size == 1) {
-            expandableListView.expandGroup(0)
-        }
-
-        // Imposta il listener per il click sui bambini (elementi)
-        expandableListView.setOnChildClickListener { _, _, groupPosition, childPosition, _ ->
-            setSelectedProductWithDilution(
-                items[groupPosition][childPosition],
-                productWithDilutions
-            )
-            true
-        }
-
-        // Crea l'AlertDialog
-        val alertDialog = AlertDialog.Builder(this)
-            .setTitle("Diluizioni per ${productWithDilutions.product.name}")
-            .setView(expandableListView)
-            .setNegativeButton("Annulla", null)
-            .create()
-
-        alertDialog.show()
     }
 }
