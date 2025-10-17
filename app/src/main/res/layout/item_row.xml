@@ -1,13 +1,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="130dp"
+    android:layout_height="wrap_content"
     android:background="@drawable/item_row_border"
     android:orientation="horizontal">
 
     <LinearLayout
         android:gravity="center_vertical"
-        android:paddingLeft="25dp"
-        android:paddingRight="25dp"
+        android:paddingTop="12dp"
+        android:paddingLeft="14dp"
+        android:paddingRight="14dp"
+        android:paddingBottom="0dp"
         android:orientation="vertical"
         android:layout_width="0dp"
         android:layout_weight="1"
@@ -20,57 +22,64 @@
             android:layout_height="wrap_content"
             android:textColor="#E70212"
             android:textStyle="bold"
-            android:textSize="15sp"
+            android:textSize="14sp"
             android:text="Fase N">
         </TextView>
 
         <TextView
             android:id="@+id/title"
+            android:textColor="#252525"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="6dp"
             android:text="Label EditText"
             android:textAlignment="center"
-            android:textSize="26sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
             android:orientation="horizontal">
 
             <EditText
+                android:textColor="#252525"
+                android:textSize="36sp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
                 android:id="@+id/valueEditText"
-                android:layout_width="120dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:background="@android:color/transparent"
                 android:hint="0"
                 android:inputType="numberDecimal"
                 android:text="0" />
 
             <TextView
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:textSize="18sp"
+                android:textColor="#252525"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
                 android:id="@+id/valueTextView"
-                android:layout_width="120dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:text="0" />
 
             <TextView
+                android:layout_marginLeft="8dp"
+                android:textColor="#767676"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:paddingEnd="4dp"
                 android:text="ml"
                 android:id="@+id/valueSuffix"
-                android:textSize="16sp" />
+                android:textSize="20sp" />
         </LinearLayout>
     </LinearLayout>
-
     <ImageView
         android:id="@+id/handle"
         android:padding="10dp"

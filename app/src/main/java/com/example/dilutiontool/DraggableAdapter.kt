@@ -1,5 +1,6 @@
 package com.example.dilutiontool
 
+import android.content.Context
 import android.graphics.drawable.LayerDrawable
 import android.text.Editable
 import android.text.TextWatcher
@@ -7,6 +8,8 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -40,8 +43,27 @@ class DraggableAdapter(
         holder.valueEditText.setText(getStringValue(currentItem.value))
         holder.valueEditText.addTextChangedListener(holder.textWatcher)
 
+        // focus & open editor just like you clicked on the edittext
+        holder.itemView.setOnClickListener {
+            holder.valueEditText.requestFocus()
+            val imm = holder.itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(holder.valueEditText, InputMethodManager.SHOW_IMPLICIT)
+        }
+
+        // lose focus on keyboard 'done' press
+        holder.valueEditText.setOnEditorActionListener { editText, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val imm = holder.itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(holder.valueEditText.windowToken, 0)
+                holder.valueEditText.clearFocus()
+                true
+            } else {
+                false
+            }
+        }
+
+        // Carica l'immagine corrispondente e il gradiente e combina con LayerDrawable
         if (currentItem.bgResId > 0) {
-            // Carica l'immagine corrispondente e il gradiente e combina con LayerDrawable
             val context = holder.itemView.context
             val layerDrawable = LayerDrawable(arrayOf(
                 ContextCompat.getDrawable(context, currentItem.bgResId),
