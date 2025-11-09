@@ -2,6 +2,15 @@ package com.example.dilutiontool
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.ColorFilter
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.PixelFormat
+import android.graphics.RectF
+import android.graphics.Shader
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableString
@@ -130,10 +139,15 @@ class MainActivity : AppCompatActivity() {
 
             // Initialize seekbar
             if (selectedDilution.minValue != selectedDilution.value) {
-                seekBar.progress = 0
                 seekBar.max = selectedDilution.value - selectedDilution.minValue
-                seekBar.visibility = View.VISIBLE
                 seekBar.progress = selectedDilution.value - currentDilutionValue.roundToInt()
+                seekBar.visibility = View.VISIBLE
+
+                // Aggiorna gradiente in base alla forza
+                seekBar.post { // post perché width deve essere già calcolata
+                    updateSeekBarGradient(seekBar, selectedDilution.minValue.toDouble(), selectedDilution.value.toDouble())
+                }
+
                 seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                         if (fromUser) {
@@ -154,6 +168,59 @@ class MainActivity : AppCompatActivity() {
             discardCurrentProductSelection()
         }
     }
+
+    // Calcola la forza del prodotto dato X nella diluizione 1:X
+    private fun calculateForce(x: Double): Double = 1.0 / (1.0 + x)
+
+    // Calcola la posizione relativa della forza nella barra (0..1)
+    private fun calculateNormalizedForce(current: Double, min: Double, max: Double): Float {
+        val f = calculateForce(current)
+        val fMin = calculateForce(min)
+        val fMax = calculateForce(max)
+        return ((f - fMin) / (fMax - fMin)).toFloat()
+    }
+
+    private fun updateSeekBarGradient(seekBar: SeekBar, minDilution: Double, maxDilution: Double) {
+        // Calcolo posizione del giallo a metà forza
+        val midPosition = calculateNormalizedForce((maxDilution - minDilution)/2.0 + minDilution, minDilution, maxDilution)
+
+        val colors = intArrayOf(
+            Color.parseColor("#30AD4F"), // verde
+            Color.parseColor("#FFDD00"), // giallo
+            Color.parseColor("#C63232")  // rosso
+        )
+        val positions = floatArrayOf(0f, midPosition, 1f)
+
+        // Creazione shader lineare
+        val gradient = LinearGradient(
+            0f, 0f, seekBar.width.toFloat(), 0f,
+            colors, positions, Shader.TileMode.CLAMP
+        )
+
+        // Shape arrotondata con altezza inferiore al thumb
+        val paintDrawable = object : Drawable() {
+            override fun draw(canvas: Canvas) {
+                val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+                paint.shader = gradient
+
+                // dimensioni arrotondate
+                val radius = 25f // corrisponde ai 25dp
+                val height = 12f * seekBar.resources.displayMetrics.density // 12dp
+                val top = (bounds.centerY() - height/2)
+                val bottom = (bounds.centerY() + height/2)
+                val rectF = RectF(bounds.left.toFloat(), top, bounds.right.toFloat(), bottom)
+                canvas.drawRoundRect(rectF, radius, radius, paint)
+            }
+
+            override fun setAlpha(alpha: Int) {}
+            override fun setColorFilter(colorFilter: ColorFilter?) {}
+            override fun getOpacity(): Int = PixelFormat.OPAQUE
+        }
+
+        // Imposta il drawable sulla barra di progresso
+        seekBar.background = paintDrawable
+    }
+
 
     private fun discardCurrentProductSelection() {
         selectedProductDilution = null
