@@ -198,6 +198,7 @@ class MainActivity : AppCompatActivity() {
         selectedProductLinkTextView = findViewById(R.id.selectedProductLinkTextView)
         seekBar = findViewById(R.id.seekBar)
         selectedProductContainer = findViewById(R.id.selectedProductContainer)
+        val selectedProduct = findViewById<LinearLayout>(R.id.selectedProduct)
         noSelectedProductLabel = findViewById(R.id.noSelectedProductLabel)
         discardProductSelectionFab = findViewById(R.id.discardProductSelectionFab)
 
@@ -241,7 +242,7 @@ class MainActivity : AppCompatActivity() {
         val launchProductList = View.OnClickListener {
             launchProductListActivity()
         }
-        selectedProductContainer.setOnClickListener(launchProductList)
+        selectedProduct.setOnClickListener(launchProductList)
         noSelectedProductLabel.setOnClickListener(launchProductList)
     }
 
