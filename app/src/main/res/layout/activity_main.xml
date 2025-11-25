@@ -70,10 +70,12 @@
                         android:background="@drawable/border"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="16dp"
                         android:visibility="gone">
 
                         <LinearLayout
+                            android:paddingTop="16dp"
+                            android:paddingLeft="16dp"
+                            android:paddingRight="16dp"
                             android:id="@+id/selectedProduct"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -83,9 +85,9 @@
 
                             <ImageView
                                 android:id="@+id/selectedProductImage"
-                                android:layout_width="80dp"
-                                android:layout_height="80dp"
-                                android:layout_gravity="center"
+                                android:layout_width="88dp"
+                                android:layout_height="88dp"
+                                android:layout_gravity="top"
                                 android:src="@drawable/default_image" />
 
                             <LinearLayout
@@ -99,6 +101,7 @@
                                     android:id="@+id/selectedProductName"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginBottom="4dp"
                                     android:ellipsize="end"
                                     android:maxLines="1"
                                     android:text="Product Name"
@@ -108,11 +111,10 @@
                                     android:id="@+id/selectedProductDescription"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
                                     android:ellipsize="end"
                                     android:maxLines="2"
-                                    android:padding="4dp"
-                                    android:background="#D9BBFF"
+                                    android:paddingTop="4dp"
+                                    android:paddingBottom="4dp"
                                     android:text="Product Description"
                                     android:textSize="14sp" />
 
@@ -121,18 +123,30 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:paddingTop="4dp"
+                                    android:paddingBottom="4dp"
                                     android:text="Product link"
                                     android:textColor="@color/link_color" />
                             </LinearLayout>
                         </LinearLayout>
 
-                        <SeekBar
-                            android:id="@+id/seekBar"
+                        <LinearLayout
+                            android:paddingLeft="16dp"
+                            android:paddingRight="16dp"
+                            android:minHeight="16dp"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:progressDrawable="@drawable/seekbar_progress"
-                            android:thumb="@drawable/seekbar_thumb" />
+                            android:layout_gravity="center"
+                            android:gravity="center">
+
+                            <SeekBar
+                                android:id="@+id/seekBar"
+                                android:paddingTop="16dp"
+                                android:paddingBottom="16dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:progressDrawable="@drawable/seekbar_progress"
+                                android:thumb="@drawable/seekbar_thumb" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </FrameLayout>
