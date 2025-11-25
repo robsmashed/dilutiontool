@@ -73,9 +73,7 @@
                         android:visibility="gone">
 
                         <LinearLayout
-                            android:paddingTop="16dp"
-                            android:paddingLeft="16dp"
-                            android:paddingRight="16dp"
+                            android:padding="16dp"
                             android:id="@+id/selectedProduct"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -130,9 +128,9 @@
                         </LinearLayout>
 
                         <LinearLayout
+                            android:id="@+id/seekBarContainer"
                             android:paddingLeft="16dp"
                             android:paddingRight="16dp"
-                            android:minHeight="16dp"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"

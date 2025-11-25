@@ -60,6 +60,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedProductImageView: ImageView
     private lateinit var selectedProductLinkTextView: TextView
     private lateinit var seekBar: SeekBar
+    private lateinit var seekBarContainer: LinearLayout
+    private lateinit var selectedProduct: LinearLayout
     private lateinit var discardProductSelectionFab: FloatingActionButton
     private lateinit var selectedProductContainer: LinearLayout
     private lateinit var noSelectedProductLabel: TextView
@@ -141,7 +143,7 @@ class MainActivity : AppCompatActivity() {
             if (selectedDilution.minValue != selectedDilution.value) {
                 seekBar.max = selectedDilution.value - selectedDilution.minValue
                 seekBar.progress = selectedDilution.value - currentDilutionValue.roundToInt()
-                seekBar.visibility = View.VISIBLE
+                showSeekBar(true)
 
                 // Aggiorna gradiente in base alla forza
                 seekBar.post { // post perché width deve essere già calcolata
@@ -158,7 +160,7 @@ class MainActivity : AppCompatActivity() {
                     override fun onStopTrackingTouch(seekBar: SeekBar?) {}
                 })
             } else {
-                seekBar.visibility = View.GONE
+                showSeekBar(false)
             }
 
             selectedProductContainer.visibility = View.VISIBLE
@@ -233,7 +235,17 @@ class MainActivity : AppCompatActivity() {
         discardProductSelectionFab.visibility = View.GONE
         selectedProductContainer.visibility = View.GONE
         noSelectedProductLabel.visibility = View.VISIBLE
-        seekBar.visibility = View.GONE
+        showSeekBar(false)
+    }
+
+    private fun showSeekBar(show: Boolean) {
+        seekBarContainer.visibility = if (show) View.VISIBLE else View.GONE
+        selectedProduct.setPadding(
+            selectedProduct.paddingLeft,
+            selectedProduct.paddingTop,
+            selectedProduct.paddingRight,
+            if (show) 0 else selectedProduct.paddingTop
+        )
     }
 
     private fun launchProductListActivity() {
@@ -269,8 +281,9 @@ class MainActivity : AppCompatActivity() {
         selectedProductImageView = findViewById(R.id.selectedProductImage)
         selectedProductLinkTextView = findViewById(R.id.selectedProductLinkTextView)
         seekBar = findViewById(R.id.seekBar)
+        seekBarContainer = findViewById(R.id.seekBarContainer)
         selectedProductContainer = findViewById(R.id.selectedProductContainer)
-        val selectedProduct = findViewById<LinearLayout>(R.id.selectedProduct)
+        selectedProduct = findViewById(R.id.selectedProduct)
         noSelectedProductLabel = findViewById(R.id.noSelectedProductLabel)
         discardProductSelectionFab = findViewById(R.id.discardProductSelectionFab)
 
@@ -314,7 +327,7 @@ class MainActivity : AppCompatActivity() {
         val launchProductList = View.OnClickListener {
             launchProductListActivity()
         }
-        selectedProduct.setOnClickListener(launchProductList)
+        selectedProductContainer.setOnClickListener(launchProductList)
         noSelectedProductLabel.setOnClickListener(launchProductList)
     }
 
