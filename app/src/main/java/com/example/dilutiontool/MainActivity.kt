@@ -205,11 +205,16 @@ class MainActivity : AppCompatActivity() {
 
                 // dimensioni arrotondate
                 val radius = 25f // corrisponde ai 25dp
-                val height = 12f * seekBar.resources.displayMetrics.density // 12dp
-                val top = (bounds.centerY() - height/2)
-                val bottom = (bounds.centerY() + height/2)
-                val rectF = RectF(bounds.left.toFloat(), top, bounds.right.toFloat(), bottom)
-                canvas.drawRoundRect(rectF, radius, radius, paint)
+                val height = 14f * seekBar.resources.displayMetrics.density // 14dp
+                canvas.drawRoundRect(RectF(
+                    bounds.left.toFloat(),
+                    (bounds.centerY() - height/2),
+                    bounds.right.toFloat(),
+                    (bounds.centerY() + height/2)),
+                    radius,
+                    radius,
+                    paint
+                )
             }
 
             override fun setAlpha(alpha: Int) {}
